@@ -1,0 +1,32 @@
+<!--<div style="text-align:center">-->
+  <!--<h1>-->
+    <!--Welcome to {{title}}!-->
+  <!--</h1>-->
+  <!--<img [src]="image">-->
+<!--</div>-->
+
+<!-- main app container -->
+<div class="jumbotron"
+     [ngStyle]="{'background':  'url(../assets/img/social-network-1.jpg)'}">
+  <div class="container">
+    <div class="col-sm-8 col-sm-offset-2">
+      <app-alert></app-alert>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="text-center">
+    <p>
+      SNA4Slack application
+    </p>
+    <p>
+      Project for DSD course.
+    </p>
+  </div>
+</footer>
+<!-- credits -->
+
+
+

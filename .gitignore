@@ -95,3 +95,6 @@ ENV/
 
 # Django static files
 staticfiles
+
+node_modules/blocking-proxy/built/
+/sna4slack/node_modules/
