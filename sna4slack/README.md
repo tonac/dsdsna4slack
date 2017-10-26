@@ -2,7 +2,23 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.4.8.
 
-## Development server
+## Install
+
+1. Install Node 6.9.0 or higher, together with NPM 3 or higher (https://nodejs.org/en/ or using your package manager of choice). Both come with Node.js installation.
+2. Install Angular CLI
+```bash
+npm install -g @angular/cli
+```
+3. If you get the message
+```bash
+node_modules appears empty, you may need to run `npm install`
+```
+just run
+```bash
+npm install
+```
+
+## Run the app
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
