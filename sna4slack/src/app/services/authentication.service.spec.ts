@@ -1,12 +1,11 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {inject, TestBed} from '@angular/core/testing';
 
-import { AuthenticationService } from './authentication.service';
+import {AuthenticationService} from './authentication.service';
+import {TestConfig} from "../test.config";
 
 describe('AuthenticationService', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [AuthenticationService]
-    });
+    TestBed.configureTestingModule(TestConfig.testModule).compileComponents();
   });
 
   it('should be created', inject([AuthenticationService], (service: AuthenticationService) => {

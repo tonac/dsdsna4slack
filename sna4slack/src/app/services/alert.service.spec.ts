@@ -1,12 +1,11 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {inject, TestBed} from '@angular/core/testing';
 
-import { AlertService } from './alert.service';
+import {AlertService} from './alert.service';
+import {TestConfig} from "../test.config";
 
 describe('AlertService', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [AlertService]
-    });
+    TestBed.configureTestingModule(TestConfig.testModule).compileComponents();
   });
 
   it('should be created', inject([AlertService], (service: AlertService) => {
