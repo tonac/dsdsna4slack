@@ -98,3 +98,7 @@ staticfiles
 
 node_modules/blocking-proxy/built/
 /sna4slack/node_modules/
+
+sna4slack/gradlew
+
+sna4slack/gradlew\.bat
