@@ -96,9 +96,7 @@ ENV/
 # Django static files
 staticfiles
 
-node_modules/blocking-proxy/built/
-/sna4slack/node_modules/
-
-sna4slack/gradlew
-
-sna4slack/gradlew\.bat
+node_modules
+gradlew
+gradlew\.bat
+package-lock.json
