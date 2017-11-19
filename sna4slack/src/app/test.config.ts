@@ -1,16 +1,21 @@
 import {APP_BASE_HREF} from "@angular/common";
-import {AlertService} from "./services/alert.service";
-import {RegisterComponent} from "./main/register/register.component";
-import {LoginComponent} from "./main/login/login.component";
-import {HomeComponent} from "./main/home/home.component";
-import {AlertComponent} from "./components/alert/alert.component";
-import {routing} from "./app.routing";
 import {FormsModule} from "@angular/forms";
-import {AppComponent} from "./app.component";
-import {AuthGuard} from "./guards/auth.guard";
-import {UserService} from "./services/user.service";
 import {HttpModule} from "@angular/http";
+
+import {AlertService} from "./services/alert.service";
+import {UserService} from "./services/user.service";
 import {AuthenticationService} from "./services/authentication.service";
+
+import {AppComponent} from "./app.component";
+import {AlertComponent} from "./components/alert/alert.component";
+import {HomeComponent} from "./main/home/home.component";
+import {RegisterComponent} from "./main/register/register.component";
+import {DashboardComponent} from './main/dashboard/dashboard.component';
+import {ArchiveComponent} from './main/dashboard/archive/archive.component';
+
+import {routing} from "./app.routing";
+import {AuthGuard} from "./guards/auth.guard";
+
 
 export class TestConfig {
   static testModule = {
@@ -23,8 +28,9 @@ export class TestConfig {
       AppComponent,
       AlertComponent,
       HomeComponent,
-      LoginComponent,
-      RegisterComponent
+      RegisterComponent,
+      DashboardComponent,
+      ArchiveComponent
     ],
     providers: [
       AlertService,

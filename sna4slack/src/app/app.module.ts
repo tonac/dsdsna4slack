@@ -5,8 +5,8 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {AppComponent} from './app.component';
 import {AlertComponent} from './components/alert/alert.component';
 import {HomeComponent} from './main/home/home.component';
-import {LoginComponent} from './main/login/login.component';
 import {RegisterComponent} from './main/register/register.component';
+import {ArchiveComponent} from './main/dashboard/archive/archive.component';
 import {BaseRequestOptions, HttpModule} from "@angular/http";
 import {FormsModule} from "@angular/forms";
 import {MockBackend} from "@angular/http/testing";
@@ -16,6 +16,10 @@ import {AlertService} from "./services/alert.service";
 import {AuthGuard} from "./guards/auth.guard";
 import {mockBackendProvider} from "./utils/mock-backend";
 import {routing} from "./app.routing";
+import { DashboardComponent } from './main/dashboard/dashboard.component';
+
+let homeState = {name: 'home', url:'/', component: HomeComponent};
+let registerState = {name: 'register', url:'/register', component: RegisterComponent};
 
 @NgModule({
   imports: [
@@ -29,8 +33,9 @@ import {routing} from "./app.routing";
     AppComponent,
     AlertComponent,
     HomeComponent,
-    LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    DashboardComponent,
+    ArchiveComponent
   ],
   providers: [
     AuthGuard,
