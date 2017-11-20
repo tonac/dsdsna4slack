@@ -16,7 +16,6 @@ import {ArchiveComponent} from './main/dashboard/archive/archive.component';
 import {routing} from "./app.routing";
 import {AuthGuard} from "./guards/auth.guard";
 
-
 export class TestConfig {
   static testModule = {
     imports: [

@@ -9,7 +9,7 @@ const appRoutes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'register', component: RegisterComponent},
   ...DashboardRoutes,
-  
+
   // otherwise redirect to home
   {path: '**', redirectTo: ''}
 ];
