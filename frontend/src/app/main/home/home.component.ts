@@ -1,33 +1,40 @@
 import {Component, OnInit} from '@angular/core';
-import {User} from "../../model/user";
-import {UserService} from "../../services/user.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthenticationService} from "../../services/authentication.service";
+import {AlertService} from "../../services/alert.service";
 
 @Component({
   moduleId: module.id,
-  templateUrl: 'home.component.html'
+  templateUrl: 'home.component.html',
+  selector: 'app-home',
+  styleUrls: ['./home.component.css']
 })
 
 export class HomeComponent implements OnInit {
-  currentUser: User;
-  users: User[] = [];
+  model: any = {};
+  loading = false;
+  returnUrl: string;
 
-  constructor(private userService: UserService) {
-    this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  constructor(private route: ActivatedRoute,
+              private router: Router,
+              private authenticationService: AuthenticationService,
+              private alertService: AlertService) {
   }
 
   ngOnInit() {
-    this.loadAllUsers();
+    this.authenticationService.logout();
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard/archives';
   }
-
-  deleteUser(id: number) {
-    this.userService.delete(id).subscribe(() => {
-      this.loadAllUsers()
-    });
-  }
-
-  private loadAllUsers() {
-    this.userService.getAll().subscribe(users => {
-      this.users = users;
-    });
+  login() {
+    this.loading = true;
+    this.authenticationService.login(this.model.username, this.model.password)
+      .subscribe(
+        data => {
+          this.router.navigate([this.returnUrl]);
+        },
+        error => {
+          this.alertService.error(error);
+          this.loading = false;
+        });
   }
 }

@@ -1,13 +1,14 @@
 import {RouterModule, Routes} from '@angular/router';
+
 import {HomeComponent} from "./main/home/home.component";
 import {AuthGuard} from "./guards/auth.guard";
-import {LoginComponent} from "./main/login/login.component";
 import {RegisterComponent} from "./main/register/register.component";
+import {DashboardRoutes} from "./main/dashboard/dashboard.routes";
 
 const appRoutes: Routes = [
-  {path: '', component: HomeComponent, canActivate: [AuthGuard]},
-  {path: 'login', component: LoginComponent},
+  {path: '', component: HomeComponent},
   {path: 'register', component: RegisterComponent},
+  ...DashboardRoutes,
 
   // otherwise redirect to home
   {path: '**', redirectTo: ''}
