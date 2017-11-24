@@ -1,0 +1,31 @@
+version: "3.4"
+
+services:
+  postgres:
+    restart: always
+    image: postgres:10.1-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgresql/data/:/var/lib/postgresql/data/
+
+  angular:
+    build: './frontend/'
+    image: angular:1.0
+    ports:
+      - '4200:4200'
+    volumes:
+      - ./frontend/:/home/node/app/
+    command: sh docker_dev.sh
+
+  django:
+    restart: always
+    build: './backend/'
+    image: django:1.0
+    ports:
+      - '80:8000'
+    volumes:
+      - ./backend/:/app/
+    links:
+      - postgres
+    command: sh docker_dev.sh
