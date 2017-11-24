@@ -16,7 +16,18 @@ Including another URLconf
 from django.conf.urls import url, include
 from backend import views
 
+from rest_framework import routers
+from archives.views import ArchiveViewSet, SlackUserViewSet, ChannelViewSet, MessageViewSet
+
+router = routers.DefaultRouter()
+router.register(r'archives', ArchiveViewSet, base_name='archive')
+router.register(r'slack_users', SlackUserViewSet, base_name='slackuser')
+router.register(r'channels', ChannelViewSet, base_name='channel')
+router.register(r'messages', MessageViewSet, base_name='message')
+
 urlpatterns = [
     url(r'^apis/$', views.api_root),
+    url(r'^', include(router.urls)),
     url(r'^', include('authentication.urls')),
+    #url(r'archives/', include('archives.urls')),
 ]
