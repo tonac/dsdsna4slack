@@ -1,0 +1,18 @@
+<div *ngIf="graphVisualization">
+  <div id="my_network" class="row"></div>
+  <div class="row" style="padding-top: 20px">
+    <button class="btn btn-default btn-primary" (click)="goBackToResults()">Return to results list</button>
+  </div>
+</div>
+
+<div *ngIf="!graphVisualization">
+  <div class="row" *ngFor="let result of results; let i = index">
+    <div class="col-md-3">
+      <div [id]="getResultId(i)"></div>
+    </div>
+    <div class="col-md-9">
+      <button class="btn btn-default btn-primary"  style="padding-top: 20px" (click)="enlarge(result)"> Enlarge</button>
+    </div>
+    <app-network-vis [network]="result" [networkIndex]="i"></app-network-vis>
+  </div>
+</div>
