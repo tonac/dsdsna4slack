@@ -2,7 +2,6 @@ version: "3.4"
 
 services:
   postgres:
-    restart: always
     image: postgres:10.1-alpine
     ports:
       - "5432:5432"
@@ -16,14 +15,15 @@ services:
       - '4200:4200'
     volumes:
       - ./frontend/:/home/node/app/
+    links:
+      - django
     command: sh docker_dev.sh
 
   django:
-    restart: always
     build: './backend/'
     image: django:1.0
     ports:
-      - '80:8000'
+      - '8000:8000'
     volumes:
       - ./backend/:/app/
     links:
