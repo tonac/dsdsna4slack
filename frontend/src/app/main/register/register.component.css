@@ -1,3 +1,15 @@
+.background{
+  background-image: url(/assets/img/slack_background.png);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size:     cover;
+  padding-top: 8%;
+  padding-bottom: 12%;
+  padding-left: 10%;
+  padding-right: 15%;
+}
+
+
 .center {
   float: none;
   margin-left: auto;
@@ -6,5 +18,6 @@
   border-radius: 25px;
   background-color: rgba(192,192,192,0.8);
   padding: 20pt;
-  width: 40%;
+  width: 30%;
+  min-width: 300px;
 }

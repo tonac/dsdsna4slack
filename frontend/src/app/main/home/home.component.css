@@ -1,23 +1,47 @@
+.mainView{
+  background-image: url(/assets/img/slack_background.png);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size:     cover;
+  align-items:center;
+  padding-top: 8%;
+  padding-bottom: 12%;
+  padding-left: 10%;
+  padding-right: 15%;
+}
+
 .about {
-  margin-top: 20%;
-  margin-left: 10%;
-  display: inline-block;
-  width: 50%;
-  /*background-image: url(/assets/img/graph.png);*/
+  border-radius: 25px;
+  background-color: rgba(192,192,192,0.6);
+  padding: 15pt;
+  display:block;
+  height: fit-content;
+  width: fit-content;
+  margin-left:auto;
+  margin-right:auto;
+  display:block;
+  max-width: 800px;
 }
 
 .login-form {
   border-radius: 25px;
   background-color: rgba(192,192,192,0.8);
   padding: 15pt;
-  margin-top: 15%;
-  margin-right: 8%;
-  width: 28%;
-  float: right;
-
+  display:block;
+  height: fit-content;
+  width: fit-content;
+  margin-left:auto;
+  margin-right:auto;
+  display:block;
 }
 
 .login-button {
   width: 100%;
   margin-bottom: 6%;
+}
+
+@media (max-width: 768px) {
+  .login-form {
+    margin-top: 10%;
+  }
 }
