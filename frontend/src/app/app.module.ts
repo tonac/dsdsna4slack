@@ -44,8 +44,8 @@ let registerState = {name: 'register', url:'/register', component: RegisterCompo
     UserService,
 
     // providers used to create fake backend
-    mockBackendProvider,
-    MockBackend,
+    // mockBackendProvider,
+    // MockBackend,
     BaseRequestOptions
   ],
   bootstrap: [AppComponent]

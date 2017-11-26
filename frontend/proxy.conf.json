@@ -1,6 +1,6 @@
 {
   "/": {
-    "target": "http://localhost:8000",
+    "target": "http://django:8000",
     "secure": false,
     "logLevel": "debug"
   }
