@@ -17,6 +17,9 @@ import {AuthGuard} from "./guards/auth.guard";
 import {mockBackendProvider} from "./utils/mock-backend";
 import {routing} from "./app.routing";
 import { DashboardComponent } from './main/dashboard/dashboard.component';
+import {AnalyseComponent} from './main/dashboard/analyse/analyse.component';
+import {ResultsComponent} from './main/dashboard/results/results.component';
+import {ShareComponent} from './main/dashboard/share/share.component';
 
 let homeState = {name: 'home', url:'/', component: HomeComponent};
 let registerState = {name: 'register', url:'/register', component: RegisterComponent};
@@ -35,7 +38,10 @@ let registerState = {name: 'register', url:'/register', component: RegisterCompo
     HomeComponent,
     RegisterComponent,
     DashboardComponent,
-    ArchiveComponent
+    ArchiveComponent,
+    AnalyseComponent,
+    ResultsComponent,
+    ShareComponent
   ],
   providers: [
     AuthGuard,
@@ -44,8 +50,8 @@ let registerState = {name: 'register', url:'/register', component: RegisterCompo
     UserService,
 
     // providers used to create fake backend
-    mockBackendProvider,
-    MockBackend,
+    // mockBackendProvider,
+    // MockBackend,
     BaseRequestOptions
   ],
   bootstrap: [AppComponent]

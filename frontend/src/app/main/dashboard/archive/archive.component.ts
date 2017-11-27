@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { PACKAGE_ROOT_URL } from '@angular/core/src/application_tokens';
 import 'rxjs/Rx'; 
+import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Archive } from '../../../model/archive';
 
 @Component({
   selector: 'app-archive',
@@ -10,44 +13,59 @@ import 'rxjs/Rx';
 })
 export class ArchiveComponent implements OnInit {
   hasArchives: boolean;
-  archives: Array<string>;
-  text: string;
-  observer: any;
+  archives: Observable<Array<Archive>>;
 
-  constructor() { 
+  archivesArray: Array<Archive>;
+  archivesSubject: BehaviorSubject<Array<Archive>>;
+
+  constructor() {
   }
 
   ngOnInit() {
-    this.archives = [];
-    this.hasArchives = this.archives.length !== 0;
-    this.text = "";
-    
+    var tmpArchive: Archive = new Archive();
+    tmpArchive.id = 0;
+    tmpArchive.name = 'DSD-sna4slack';
+    tmpArchive.lastModified = new Date(2017, 11, 25, 0,0,0,0);
+    this.archivesArray = [tmpArchive];
+    this.archivesSubject = new BehaviorSubject<Array<Archive>>(this.archivesArray);
+    this.archives = this.archivesSubject.asObservable();
+    this.hasArchives = false;
 
-    // Observable.from(this.archives)
-    //   .subscribe({next: name => 
-    //   // this.text += name;
-    //   console.log(name)
-    // });
-    // this.archives.push('test');
-
+    this.archives
+      .subscribe({ next: 
+        o => this.hasArchives = o.length != 0
+      });
   }
 
   add() {
-    document.getElementById('light').style.display='block';
-    document.getElementById('fade').style.display='block'
+    document.getElementById('myModal').style.display = 'block';
+  }
+
+  delete(id: number){
+    var index: number  = this.archivesArray.findIndex((o) => o.id === id);
+    if (index !== undefined) {
+      this.archivesArray.splice(index, 1);}
+      this.archivesSubject.next(this.archivesArray);
   }
 
   submit(){
     this.closePopup();
-    this.hasArchives = true;
-    console.log("submit");
-
     var f = (<HTMLInputElement>document.getElementById('file')).files[0];
-    this.archives.push(f.name);
+    this.addToArchives(f.name);
   }
 
   closePopup() {
-    document.getElementById('light').style.display='none';
-    document.getElementById('fade').style.display='none';
+    document.getElementById('myModal').style.display = 'none';
+  }
+
+  addToArchives(archive: string){
+    var newArchive: Archive = new Archive();
+    newArchive.name = archive;
+    newArchive.lastModified = new Date();
+
+    var maxIndex = Math.max(...this.archivesArray.map((o) => o.id));
+    newArchive.id = maxIndex+1;
+    this.archivesArray.push(newArchive);
+    this.archivesSubject.next(this.archivesArray);
   }
 }

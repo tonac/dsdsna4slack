@@ -28,6 +28,7 @@ export class RegisterComponent {
           this.alertService.success('Registration successful', true);
           this.router.navigate(['/']);
         },
+        // TODO: errors are not showing to user? where? how?
         error => {
           this.alertService.error(error);
           this.loading = false;
