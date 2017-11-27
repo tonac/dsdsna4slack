@@ -23,6 +23,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.authenticationService.logout();
+    // TODO: if has token redirect to dashboard, why logout?
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard/archives';
   }
   login() {

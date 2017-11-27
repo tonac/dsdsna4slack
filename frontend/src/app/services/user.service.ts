@@ -17,7 +17,7 @@ export class UserService {
   }
 
   create(user: User) {
-    return this.http.post('/api/users', user, this.jwt()).map((response: Response) => response.json());
+    return this.http.post('/api/authentication/v1/register/', user, this.jwt()).map((response: Response) => response.json());
   }
 
   update(user: User) {
@@ -34,7 +34,7 @@ export class UserService {
     // create authorization header with jwt token
     let currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (currentUser && currentUser.token) {
-      let headers = new Headers({'Authorization': 'Bearer ' + currentUser.token});
+      let headers = new Headers({'Authorization': 'Token ' + currentUser.token});
       return new RequestOptions({headers: headers});
     }
   }
