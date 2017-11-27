@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAdminUser
 
 @api_view(['POST'])
 def create_account(request):
-    print('Check here', request.user, request.data)
     serialized = UserSerializer(data=request.data)
     if serialized.is_valid():
         User.objects.create_user(
