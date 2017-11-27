@@ -14,6 +14,8 @@ export class HomeComponent implements OnInit {
   model: any = {};
   loading = false;
   returnUrl: string;
+  usernameErrorList = [];
+  passwordErrorList = [];
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -26,6 +28,7 @@ export class HomeComponent implements OnInit {
     // TODO: if has token redirect to dashboard, why logout?
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard/archives';
   }
+
   login() {
     this.loading = true;
     this.authenticationService.login(this.model.username, this.model.password)
@@ -34,7 +37,17 @@ export class HomeComponent implements OnInit {
           this.router.navigate([this.returnUrl]);
         },
         error => {
-          this.alertService.error(error);
+          let json = JSON.parse(error._body);
+          this.usernameErrorList = json.username;
+          this.passwordErrorList = json.password;
+          if (json.detail) {
+            this.alertService.error(json.detail);
+          } else if (json.non_field_errors) {
+            this.alertService.error(json.non_field_errors);
+          } else {
+            this.alertService.error("Form has errors, fix them and try again!");
+          }
+          console.log(json);
           this.loading = false;
         });
   }

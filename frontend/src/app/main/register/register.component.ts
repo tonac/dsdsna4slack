@@ -14,6 +14,10 @@ import {AlertService} from "../../services/alert.service";
 export class RegisterComponent {
   model: any = {};
   loading = false;
+  firstNameErrorList = [];
+  lastNameErrorList = [];
+  usernameErrorList = [];
+  passwordErrorList = [];
 
   constructor(private router: Router,
               private userService: UserService,
@@ -22,6 +26,7 @@ export class RegisterComponent {
 
   register() {
     this.loading = true;
+
     this.userService.create(this.model)
       .subscribe(
         data => {
@@ -30,7 +35,18 @@ export class RegisterComponent {
         },
         // TODO: errors are not showing to user? where? how?
         error => {
-          this.alertService.error(error);
+          let json = JSON.parse(error._body);
+          this.firstNameErrorList = json.firstName;
+          this.lastNameErrorList = json.lastName;
+          this.usernameErrorList = json.username;
+          this.passwordErrorList = json.password;
+          if (json.detail) {
+            this.alertService.error(json.detail);
+          } else if (json.non_field_errors) {
+            this.alertService.error(json.non_field_errors);
+          } else {
+            this.alertService.error("Form has errors, fix them and try again!");
+          }
           this.loading = false;
         });
   }
