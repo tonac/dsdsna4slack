@@ -4,6 +4,7 @@ import 'rxjs/Rx';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Archive} from '../../../model/archive';
 import {ArchiveService} from '../../../services/archive.service';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-archive',
@@ -11,13 +12,18 @@ import {ArchiveService} from '../../../services/archive.service';
   styleUrls: ['./archive.component.css']
 })
 export class ArchiveComponent implements OnInit {
+  form: FormGroup;
   hasArchives: boolean;
   archives: Observable<Array<Archive>>;
 
   archivesArray: Array<Archive>;
   archivesSubject: BehaviorSubject<Array<Archive>>;
 
-  constructor(private archiveService: ArchiveService) {
+  constructor(private archiveService: ArchiveService, private fb: FormBuilder) {
+    this.form = this.fb.group({
+      filename: ['', Validators.required],
+      file: null
+    });
   }
 
   ngOnInit() {
@@ -52,6 +58,7 @@ export class ArchiveComponent implements OnInit {
   submit() {
     this.closePopup();
     var f = (<HTMLInputElement>document.getElementById('file')).files[0];
+    console.log(this.form);
     this.addToArchives(f.name);
   }
 
@@ -60,6 +67,12 @@ export class ArchiveComponent implements OnInit {
   }
 
   addToArchives(archive: string) {
+    this.archiveService.addNew(this.form.value, archive).subscribe(
+      data => {
+        console.log(data);
+      });
+
+
     var newArchive: Archive = new Archive();
     newArchive.name = archive;
     newArchive.lastModified = new Date();
@@ -68,5 +81,21 @@ export class ArchiveComponent implements OnInit {
     newArchive.id = maxIndex + 1;
     this.archivesArray.push(newArchive);
     this.archivesSubject.next(this.archivesArray);
+  }
+
+  onFileChange(event) {
+    let reader = new FileReader();
+    if(event.target.files && event.target.files.length > 0) {
+      let file = event.target.files[0];
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.form.get('file').setValue({
+          filename: file.name,
+          filetype: file.type,
+          value: reader.result.split(',')[1]
+        });
+        this.form.get('filename').setValue(file.name);
+      };
+    }
   }
 }

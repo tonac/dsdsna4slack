@@ -10,15 +10,15 @@
         Add one to get started.
       </h1>
     </div>
-    
+
     <div class="col-md-2" style="text-align:center">
       <i (click)='add()' class="fa fa-plus-circle fa-5x" aria-hidden="true"></i>
       <br><br>
       <i  *ngIf="!this.hasArchives" class="fa fa-reply fa-rotate-90 fa-5x" aria-hidden="true"></i>
     </div>
   </div>
-  
-  <div *ngIf="this.hasArchives" style="width:100%">
+
+  <div *ngIf="false" style="width:100%">
     <table class="table-striped archives_table" name="archivesTable" style="width:inherit;">
       <thead>
         <th> Archive name </th>
@@ -34,20 +34,21 @@
       </tbody>
     </table>
   </div>
-  
+
 
   <!-- The Modal -->
 <div id="myModal" class="modal">
-  
+
     <!-- Modal content -->
     <div class="modal-content">
       <div style="justify-content: flex-end;"><span (click)="closePopup()" class="close">&times;</span></div>
-      
-      <form name="form" (ngSubmit)="f.form.valid && submit()" #f="ngForm" novalidate>
+
+      <form [formGroup]="form" name="form" (ngSubmit)="form.valid && submit()"novalidate>
         <div class="form-group">
           <label>Choose from file</label>
           <br/>
-          <input id="file" type="file" name="file"/>
+          <input id="file" type="file" name="file" (change)="onFileChange($event)"/>
+          <input id="name" type="text" name="name" hidden/>
         </div>
         <div class="form-group" style="justify-content: flex-end;display: flex;">
           <button class="btn btn-primary">Submit</button>

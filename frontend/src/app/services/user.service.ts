@@ -30,11 +30,14 @@ export class UserService {
 
   // private helper methods
 
-  private jwt() {
+  public jwt(filename?) {
     // create authorization header with jwt token
     let currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (currentUser && currentUser.token) {
-      let headers = new Headers({'Authorization': 'Token ' + currentUser.token});
+      let headers = new Headers({
+        'Authorization': 'Token ' + currentUser.token,
+        'Content-Disposition': filename ? 'attachment; filename=' + filename : ''
+      });
       return new RequestOptions({headers: headers});
     }
   }
