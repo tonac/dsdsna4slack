@@ -19,7 +19,7 @@ class ArchiveViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Archive.objects.filter(user=self.request.user)
 
-    def create(self, request):  # filename
+    def create(self, request, filename):
         # get archive
         file_obj = request.data['file']
         slack_archive = zipfile.ZipFile(file_obj)   #
