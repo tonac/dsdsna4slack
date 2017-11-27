@@ -12,9 +12,11 @@ def create_account(request):
     serialized = UserSerializer(data=request.data)
     if serialized.is_valid():
         User.objects.create_user(
-            username=serialized.initial_data['username'],
-            email=serialized.initial_data['email'],
-            password=serialized.initial_data['password']
+            username=serialized.initial_data.get('username'),
+            email=serialized.initial_data.get('email'),
+            password=serialized.initial_data.get('password'),
+            first_name=serialized.initial_data.get('firstName', ''),
+            last_name=serialized.initial_data.get('lastName', '')
         )
         return Response(serialized.data, status=status.HTTP_201_CREATED)
     else:
