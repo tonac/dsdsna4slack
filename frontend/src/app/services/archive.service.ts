@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Headers, Http, Response} from '@angular/http';
+import {Http, Response} from '@angular/http';
 import {Archive} from '../model/archive';
 import {Observable} from 'rxjs/Observable';
 import {UserService} from './user.service';
@@ -15,18 +15,17 @@ export class ArchiveService {
       '/api/archives/',
       this.userService.jwt()
     ).map((response: Response) => {
-      return response.json();
-    }).map((data: Array<Archive>) => {
-      return [new Archive()]
+      let archives = response.json() as Archive[];
+      return archives;
     });
   }
 
   addNew(form, filename): Observable<Archive> {
-    let headers = new Headers({'Authorization': 'Token '});
     return this.http.post('/api/archives/',
       {file: form.file.value},
       this.userService.jwt(filename)).map((response: Response) => {
-      return new Archive();
+      let archive = response.json() as Archive;
+      return archive;
     });
 
     // return this.http.request(new Request(new BaseRequestOptions().merge({

@@ -18,22 +18,25 @@
     </div>
   </div>
 
-  <div *ngIf="false" style="width:100%">
+  <div *ngIf="hasArchives" style="width:100%">
     <table class="table-striped archives_table" name="archivesTable" style="width:inherit;">
       <thead>
         <th> Archive name </th>
-        <th> Last modified </th>
+        <th> Uploaded </th>
         <th>  </th>
       </thead>
       <tbody>
-        <tr *ngFor='let archive of archives | async'>
+        <tr *ngFor='let archive of archives'>
           <td> {{archive.name}} </td>
-          <td> {{archive.lastModified.toUTCString()}} </td>
-          <td> <i (click)='delete(archive.id)' class="fa fa-trash fa-2x" aria-hidden="true"></i> </td>
+          <td> {{archive.uploaded | date}} </td>
+          <td> <i (click)='delete(archive)' class="fa fa-trash fa-2x" aria-hidden="true"></i> </td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+
 
 
   <!-- The Modal -->
@@ -43,7 +46,7 @@
     <div class="modal-content">
       <div style="justify-content: flex-end;"><span (click)="closePopup()" class="close">&times;</span></div>
 
-      <form [formGroup]="form" name="form" (ngSubmit)="form.valid && submit()"novalidate>
+      <form [formGroup]="form" name="form" (ngSubmit)="form.valid && submit()" novalidate  enctype="multipart/form-data">
         <div class="form-group">
           <label>Choose from file</label>
           <br/>

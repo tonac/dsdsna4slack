@@ -19,11 +19,11 @@ class ArchiveViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Archive.objects.filter(user=self.request.user)
 
-    def create(self, request, filename):
+    def create(self, request, filename = 'dsdSNA4slack.zip'):
         # get archive
         file_obj = request.data['file']
-        slack_archive = zipfile.ZipFile(file_obj)   #
-        #slack_archive = zipfile.ZipFile('zip3.zip')
+        #slack_archive = zipfile.ZipFile(file_obj)   #
+        slack_archive = zipfile.ZipFile('zip3.zip')
         # check if zip file is valid
         if slack_archive.testzip() is None:
             # search for users.json and channels.json
