@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 })
 export class AnalyseComponent implements OnInit {
   loading: boolean;
-  archives: Observable<Array<Archive>>; 
+  archives: Observable<Array<Archive>>;
 
   archivesArray: Array<Archive>;
   archivesSubject: BehaviorSubject<Array<Archive>>;
@@ -32,11 +32,11 @@ export class AnalyseComponent implements OnInit {
     var tmpArchive: Archive = new Archive();
     tmpArchive.id = 0;
     tmpArchive.name = 'Select your archive';
-    
+
     var tmpArchive2: Archive = new Archive();
     tmpArchive2.id = 1;
     tmpArchive2.name = 'DSD-sna4slack2';
-    tmpArchive2.lastModified = new Date(2017, 11, 10, 0,0,0,0);
+    tmpArchive2.uploaded = new Date(2017, 11, 10, 0,0,0,0).toDateString();
 
     this.archivesArray = [tmpArchive, tmpArchive2];
     this.archivesSubject = new BehaviorSubject<Array<Archive>>(this.archivesArray);
@@ -55,7 +55,7 @@ export class AnalyseComponent implements OnInit {
       }
     }});
 
-    
+
   }
 
   addChannels() {
