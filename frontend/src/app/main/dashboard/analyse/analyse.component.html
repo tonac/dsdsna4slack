@@ -1,3 +1,42 @@
-<p>
-  analyse works!
-</p>
+<div class="container-fluid">
+  <h1>Analisys</h1>
+  <br><br>
+  <form name="form" (ngSubmit)="f.form.valid && analyse()" #f="ngForm" novalidate>
+    
+    <div class="form-group">
+        <select class="selectpicker form-control" [(ngModel)]="selectedArchive" name="selectOption" (ngModelChange)="selectArchive($event)">
+            <option *ngFor="let archive of archives | async" value="{{archive.id}}" [attr.selected]="archive.id == 0 ? true : null"> 
+            {{archive.name}} 
+            </option>
+        </select>
+    </div>
+    <br>
+    <div class="form-group" style="align-items:center">
+      <div style="display:block">I want my graph to be:</div>
+      <div tyle="display:block"> 
+          <select style="height:10%" class="selectpicker form-control" [(ngModel)]="selectedGraphType" name="selectOption" (ngModelChange)="selectGraphType($event)">
+              <option *ngFor="let graphType of graphTypes" value="{{graphType.id}}" [attr.selected]="graphType.id == 0 ? true : null"> 
+              {{graphType.name}} 
+              </option>
+          </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="align-items:center">
+        <div>and include these channels</div>
+        <div class="container">
+            <ng-container  *ngFor="let channel of channels">
+                <input [(id)]="channel.channel.id" type="checkbox" ngControl='channel' [(ngModel)]="channel.checked" name="tmp" (click)="checkboxSelected(channel.channel.id)"/>
+                <label>{{channel.channel.name}}</label>
+                <br>
+              </ng-container>
+        </div>
+      </div>
+
+    <div class="form-group" style="text-align:center">
+      <button [disabled]="loading" class="btn btn-primary login-button">Analyse</button>
+      <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+      <br>
+    </div>
+  </form>
+</div>
