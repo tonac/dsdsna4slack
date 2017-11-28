@@ -3,6 +3,7 @@ import 'rxjs/Rx';
 import {Archive} from '../../../model/archive';
 import {ArchiveService} from '../../../services/archive.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Ng4LoadingSpinnerService} from 'ng4-loading-spinner';
 
 @Component({
   selector: 'app-archive',
@@ -12,10 +13,11 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 export class ArchiveComponent implements OnInit {
   form: FormGroup;
   hasArchives: boolean;
-  loading: boolean;
   archives: Array<Archive>;
 
-  constructor(private archiveService: ArchiveService, private fb: FormBuilder) {
+
+  constructor(private spinnerService: Ng4LoadingSpinnerService,
+              private archiveService: ArchiveService, private fb: FormBuilder) {
     this.form = this.fb.group({
       filename: ['', Validators.required],
       file: null
@@ -24,7 +26,7 @@ export class ArchiveComponent implements OnInit {
 
   ngOnInit() {
     this.hasArchives = false;
-    this.loading = true;
+    this.spinnerService.show();
 
     this.archiveService.getAllForUser()
       .subscribe({
@@ -32,7 +34,7 @@ export class ArchiveComponent implements OnInit {
           o => {
             this.hasArchives = o.length != 0;
             this.archives = o;
-            this.loading = false;
+            this.spinnerService.hide();
           }
       });
   }
@@ -62,7 +64,7 @@ export class ArchiveComponent implements OnInit {
   }
 
   addToArchives(archive: string) {
-    this.loading = true;
+    this.spinnerService.show();
     this.archiveService.addNew(this.form.value, archive).subscribe(
       data => {
         data.name = archive;
@@ -72,7 +74,7 @@ export class ArchiveComponent implements OnInit {
           this.hasArchives = true;
           this.archives = [data];
         }
-        this.loading = false;
+        this.spinnerService.hide();
       });
   }
 

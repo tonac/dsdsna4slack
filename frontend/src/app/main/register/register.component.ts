@@ -1,7 +1,8 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
-import {UserService} from "../../services/user.service";
-import {AlertService} from "../../services/alert.service";
+import {UserService} from '../../services/user.service';
+import {AlertService} from '../../services/alert.service';
+import {Ng4LoadingSpinnerService} from 'ng4-loading-spinner';
 
 
 @Component({
@@ -13,20 +14,19 @@ import {AlertService} from "../../services/alert.service";
 
 export class RegisterComponent {
   model: any = {};
-  loading = false;
   firstNameErrorList = [];
   lastNameErrorList = [];
   usernameErrorList = [];
   passwordErrorList = [];
 
-  constructor(private router: Router,
+  constructor(private spinnerService: Ng4LoadingSpinnerService,
+              private router: Router,
               private userService: UserService,
               private alertService: AlertService) {
   }
 
   register() {
-    this.loading = true;
-
+    this.spinnerService.show();
     this.userService.create(this.model)
       .subscribe(
         data => {
@@ -45,9 +45,9 @@ export class RegisterComponent {
           } else if (json.non_field_errors) {
             this.alertService.error(json.non_field_errors);
           } else {
-            this.alertService.error("Form has errors, fix them and try again!");
+            this.alertService.error('Form has errors, fix them and try again!');
           }
-          this.loading = false;
+          this.spinnerService.hide();
         });
   }
 }

@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthenticationService} from "../../services/authentication.service";
 import {AlertService} from "../../services/alert.service";
+import {Ng4LoadingSpinnerService} from "ng4-loading-spinner";
 
 @Component({
   moduleId: module.id,
@@ -12,12 +13,12 @@ import {AlertService} from "../../services/alert.service";
 
 export class HomeComponent implements OnInit {
   model: any = {};
-  loading = false;
   returnUrl: string;
   usernameErrorList = [];
   passwordErrorList = [];
 
-  constructor(private route: ActivatedRoute,
+  constructor(private spinnerService: Ng4LoadingSpinnerService,
+              private route: ActivatedRoute,
               private router: Router,
               private authenticationService: AuthenticationService,
               private alertService: AlertService) {
@@ -30,7 +31,7 @@ export class HomeComponent implements OnInit {
   }
 
   login() {
-    this.loading = true;
+    this.spinnerService.show();
     this.authenticationService.login(this.model.username, this.model.password)
       .subscribe(
         data => {
@@ -48,7 +49,7 @@ export class HomeComponent implements OnInit {
             this.alertService.error("Form has errors, fix them and try again!");
           }
           console.log(json);
-          this.loading = false;
+          this.spinnerService.hide();
         });
   }
 }
