@@ -46,6 +46,9 @@ export class ArchiveComponent implements OnInit {
     if (index !== undefined) {
       this.archives.splice(index, 1);
     }
+    if (!this.archives || !this.archives.length) {
+      this.hasArchives = false;
+    }
   }
 
   submit() {
@@ -63,7 +66,12 @@ export class ArchiveComponent implements OnInit {
     this.archiveService.addNew(this.form.value, archive).subscribe(
       data => {
         data.name = archive;
-        this.archives.push(data);
+        if (this.archives && this.archives.length) {
+          this.archives.push(data);
+        } else {
+          this.hasArchives = true;
+          this.archives = [data];
+        }
         this.loading = false;
       });
   }
