@@ -22,7 +22,7 @@ export class AnalyseComponent implements OnInit {
   selectedArchive: number;
   selectedGraphType: number;
 
-  graphTypes: Array<any> = [{id:0, name:'mention based.'}, {id:1, name:'subscription based.'}];
+  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
 
   channels: Array<any>;
 
@@ -45,7 +45,7 @@ export class AnalyseComponent implements OnInit {
     this.selectedArchive = -1;
     this.selectedGraphType = 0;
 
-    this.addChannels();
+    this.channelsSubject = new BehaviorSubject<Array<Channel>>([]);
 
     this.channelsSubject.subscribe({next: incomingChannels => {
       this.channels = [];
@@ -54,22 +54,41 @@ export class AnalyseComponent implements OnInit {
         console.log(chan.id);
       }
     }});
+
+    
   }
 
   addChannels() {
-    this.channelsSubject = new BehaviorSubject<Array<Channel>>([
+    this.channelsSubject.next([
       new Channel(0, 'all'),
-      new Channel(1, 'general'),
-      new Channel(2, 'random')
+      new Channel(1, '#general'),
+      new Channel(2, '#random')
     ]);
   }
 
-  selectArchive(archiveID: string){
-    console.log(archiveID);
+  removeChannels() {
+    this.channelsSubject.next([]);
   }
 
-  selectGraphType(archiveID: string){
-    console.log(archiveID);
+  selectArchive(archiveID: number){
+    if(archiveID === 0){
+      this.removeChannels();
+    } else {
+      this.addChannels();
+    }
+  }
+
+  selectGraphType(graphType: number){
+  }
+
+  checkboxSelected(aCheckbox: number){
+    let allSelected = (document.getElementById('0') as HTMLInputElement).checked;
+    if (aCheckbox === 0){
+      for(var channel of this.channels){
+        (document.getElementById(channel.channel.id) as HTMLInputElement).checked = allSelected;
+        channel.checked = allSelected;
+      }
+    }
   }
 
   analyse() {
