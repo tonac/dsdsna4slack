@@ -21,7 +21,7 @@ export class ArchiveService {
   }
 
   addNew(form, filename): Observable<Archive> {
-    return this.http.post('/api/archives/',
+    return this.http.post('/api/upload/',
       {file: form.file.value},
       this.userService.jwt(filename)).map((response: Response) => {
       let archive = response.json() as Archive;
