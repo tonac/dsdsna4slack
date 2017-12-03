@@ -99,5 +99,4 @@ staticfiles
 node_modules
 gradlew
 gradlew\.bat
-package-lock.json
 postgresql

@@ -4,6 +4,7 @@ import {Archive} from '../../../model/archive';
 import {ArchiveService} from '../../../services/archive.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Ng4LoadingSpinnerService} from 'ng4-loading-spinner';
+import {AlertService} from '../../../services/alert.service';
 
 @Component({
   selector: 'app-archive',
@@ -16,7 +17,7 @@ export class ArchiveComponent implements OnInit {
   archives: Array<Archive>;
 
 
-  constructor(private spinnerService: Ng4LoadingSpinnerService,
+  constructor(private spinnerService: Ng4LoadingSpinnerService, private alertService: AlertService,
               private archiveService: ArchiveService, private fb: FormBuilder) {
     this.form = this.fb.group({
       filename: ['', Validators.required],
@@ -35,7 +36,11 @@ export class ArchiveComponent implements OnInit {
             this.hasArchives = o.length != 0;
             this.archives = o;
             this.spinnerService.hide();
-          }
+          },
+        error: error => {
+          this.spinnerService.hide();
+          this.alertService.error('Error while fetching archives: ' + error);
+        }
       });
   }
 
@@ -75,6 +80,10 @@ export class ArchiveComponent implements OnInit {
           this.archives = [data];
         }
         this.spinnerService.hide();
+      },
+      error => {
+        this.spinnerService.hide();
+        this.alertService.error('Error when adding new archive: ' + error);
       });
   }
 
