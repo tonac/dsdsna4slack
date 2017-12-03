@@ -3,10 +3,10 @@
     <div class="about">
       <h1> SNA4Slack </h1>
       <p>
-        SNA4Slack allows users to analyze and visualize social networks built upon Slack 
+        SNA4Slack allows users to analyze and visualize social networks built upon Slack
         conversations. Just as an example, this app might derive a network graph
         whose nodes are the users and directed edges are the mentions.
-        Graphs will be explored through visualization and analyzed to gain a 
+        Graphs will be explored through visualization and analyzed to gain a
         greater understanding of the network.
       </p>
     </div>
@@ -17,22 +17,23 @@
       <form name="form" (ngSubmit)="f.form.valid && login()" #f="ngForm" novalidate>
         <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !username.valid }">
           <input id="username" type="text" class="form-control" name="username" placeholder="username" [(ngModel)]="model.username" #username="ngModel" required />
-          <div *ngIf="f.submitted && !username.valid" class="help-block">Username is required</div>
+          <div *ngIf="f.submitted && !username.valid" class="help-block error-message">Username is required</div>
+          <div *ngFor="let error of usernameErrorList" class="help-block error-message">{{error}}</div>
         </div>
         <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !password.valid }">
           <input id="password" type="password" class="form-control" name="password" placeholder="password" [(ngModel)]="model.password" #password="ngModel" required />
-          <div *ngIf="f.submitted && !password.valid" class="help-block">Password is required</div>
+          <div *ngIf="f.submitted && !password.valid" class="help-block error-message">Password is required</div>
+          <div *ngFor="let error of passwordErrorList" class="help-block error-message">{{error}}</div>
         </div>
         <div class="form-group" style="text-align:center">
-          <button [disabled]="loading" class="btn btn-primary login-button">Login</button>
-          <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+          <button class="btn btn-primary login-button">Login</button>
           <br>
           <span>Don't have an account? <a [routerLink]="['/register']">Register</a></span>
         </div>
       </form>
     </div>
   </div>
-  
+
 </div>
 
 

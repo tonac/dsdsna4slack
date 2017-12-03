@@ -21,3 +21,7 @@
   width: 30%;
   min-width: 300px;
 }
+
+.error-message{
+  color:red !important;
+}

@@ -1,6 +1,5 @@
 export class Archive {
-    id: number;
-    name: string;
-    lastModified: Date;
-  }
-  
+  id: number;
+  name: string;
+  uploaded: string;
+}

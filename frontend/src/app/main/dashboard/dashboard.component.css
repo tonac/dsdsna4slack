@@ -54,7 +54,7 @@ a, a:hover, a:focus {
     top: 0;
     left: 0;
     height: 100vh;
-    z-index: 999;
+    z-index: 0;
     background: rgb(77, 57, 75);
     color: #fff;
     transition: all 0.3s;
@@ -188,7 +188,7 @@ a.article, a.article:hover {
     #sidebar .sidebar-header {
         padding: 10px;
         font-size: 12px;
-    } 
+    }
     #sidebar ul li a {
         padding: 10px;
         font-size: 12px;
@@ -197,7 +197,7 @@ a.article, a.article:hover {
     ul.CTAs {
         padding: 5px;
     }
-    
+
     ul.CTAs a {
         font-size: 9px;
     }

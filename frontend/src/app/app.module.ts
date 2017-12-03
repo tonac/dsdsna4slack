@@ -8,28 +8,32 @@ import {HomeComponent} from './main/home/home.component';
 import {RegisterComponent} from './main/register/register.component';
 import {ArchiveComponent} from './main/dashboard/archive/archive.component';
 import {BaseRequestOptions, HttpModule} from "@angular/http";
-import {FormsModule} from "@angular/forms";
-import {MockBackend} from "@angular/http/testing";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {UserService} from "./services/user.service";
 import {AuthenticationService} from "./services/authentication.service";
 import {AlertService} from "./services/alert.service";
 import {AuthGuard} from "./guards/auth.guard";
-import {mockBackendProvider} from "./utils/mock-backend";
 import {routing} from "./app.routing";
-import { DashboardComponent } from './main/dashboard/dashboard.component';
+import {DashboardComponent} from './main/dashboard/dashboard.component';
 import {AnalyseComponent} from './main/dashboard/analyse/analyse.component';
 import {ResultsComponent} from './main/dashboard/results/results.component';
 import {ShareComponent} from './main/dashboard/share/share.component';
+import {ArchiveService} from './services/archive.service';
+import {ResultService} from './services/result.service';
+import { NetworkVisComponent } from './main/dashboard/results/network-vis/network-vis.component';
+import { Ng4LoadingSpinnerModule } from 'ng4-loading-spinner';
 
-let homeState = {name: 'home', url:'/', component: HomeComponent};
-let registerState = {name: 'register', url:'/register', component: RegisterComponent};
+let homeState = {name: 'home', url: '/', component: HomeComponent};
+let registerState = {name: 'register', url: '/register', component: RegisterComponent};
 
 @NgModule({
   imports: [
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpModule,
     NgbModule.forRoot(),
+    Ng4LoadingSpinnerModule,
     routing
   ],
   declarations: [
@@ -41,17 +45,17 @@ let registerState = {name: 'register', url:'/register', component: RegisterCompo
     ArchiveComponent,
     AnalyseComponent,
     ResultsComponent,
-    ShareComponent
+    ShareComponent,
+    NetworkVisComponent
   ],
   providers: [
     AuthGuard,
     AlertService,
     AuthenticationService,
     UserService,
+    ArchiveService,
+    ResultService,
 
-    // providers used to create fake backend
-    // mockBackendProvider,
-    // MockBackend,
     BaseRequestOptions
   ],
   bootstrap: [AppComponent]

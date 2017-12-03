@@ -14,15 +14,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+<<<<<<< HEAD
+from backend import views
+from rest_framework.documentation import include_docs_urls
+=======
 from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from . import views
+>>>>>>> origin/develop
 
 urlpatterns = [
     url(r'^backend/account/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^admin/', admin.site.urls),
     url(r'^apis/$', views.api_root),
+<<<<<<< HEAD
+    url(r'^', include('authentication.urls')),
+    url(r'^archives/', include('archives.urls')),
+=======
     url(r'^api/authentication/', include('authentication.urls')),
-    url(r'^api/', include('archives.urls')),
+>>>>>>> origin/develop
     url(r'^docs/', include_docs_urls(title='SNA 4 Slack APIs', public=True)),
 ]

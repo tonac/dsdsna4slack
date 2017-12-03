@@ -26,8 +26,10 @@
     "core-js": "^2.4.1",
     "intl": "^1.2.5",
     "jquery": "^3.2.1",
+    "ng4-loading-spinner": "^1.0.27",
     "popper.js": "^1.12.6",
     "rxjs": "^5.4.2",
+    "vis": "^4.21.0",
     "zone.js": "^0.8.14"
   },
   "devDependencies": {
