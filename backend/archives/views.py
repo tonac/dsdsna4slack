@@ -8,6 +8,7 @@ from archives.permissions import IsArchiveOwner
 class ArchiveViewSet(viewsets.ModelViewSet):
     serializer_class = ArchiveSerializer
     permission_classes = (permissions.IsAuthenticated, IsArchiveOwner,)
+    http_method_names = ['get', 'head', 'delete']
 
     def get_queryset(self):
         return Archive.objects.filter(user=self.request.user)

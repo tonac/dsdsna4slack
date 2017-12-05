@@ -19,11 +19,11 @@ class SlackUserSerializer(serializers.ModelSerializer):
 
 class ArchiveSerializer(serializers.ModelSerializer):
     channels = ChannelSerializer(read_only=True, many=True)
-    slackusers = SlackUserSerializer(read_only=True, many=True)
+    #slackusers = SlackUserSerializer(read_only=True, many=True)
 
     class Meta:
         model = Archive
-        fields = ('id', 'name', 'uploaded', 'channels', 'slackusers')
+        fields = ('id', 'name', 'uploaded', 'channels')
 
 
 class SlackUserUploadSerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class ChannelUploadSerializer(serializers.ModelSerializer):
 
 
 class MessageUploadSerializer(serializers.ModelSerializer):
-    user = SlackUserField(many=False, slug_field='slack_id')
+    user = SlackUserField(many=False, slug_field='slack_id', required=False)
     ts = serializers.FloatField()
 
     class Meta:
@@ -70,7 +70,7 @@ class MessageUploadSerializer(serializers.ModelSerializer):
         fields = ('user', 'text', 'ts')
 
     def create(self, validated_data):
-        return Message.objects.create(slackuser=validated_data['user'], channel=validated_data['channel'], text=validated_data['text'], ts=datetime.datetime.fromtimestamp(validated_data['ts']))
+        return Message.objects.create(slackuser=validated_data.get('user'), channel=validated_data['channel'], text=validated_data['text'], ts=datetime.datetime.fromtimestamp(validated_data['ts']))
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
