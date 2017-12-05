@@ -1,5 +1,6 @@
 import json
 import zipfile
+import datetime
 from rest_framework import serializers
 from archives.models import Archive, SlackUser, Channel, Message, FileUpload
 
@@ -35,42 +36,41 @@ class SlackUserUploadSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return SlackUser.objects.create(slack_id=validated_data['id'], team_id=validated_data['team_id'], name=validated_data['name'], archive=validated_data['archive'])
 
-class MemberField(serializers.SlugRelatedField):
-    
+
+class SlackUserField(serializers.SlugRelatedField):
+
     def get_queryset(self):
         archive = self.context['archive']
         queryset = SlackUser.objects.filter(archive=archive)
         return queryset
 
+
 class ChannelUploadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(max_length=10)
-    members = MemberField(many=True, slug_field = 'slack_id')
+    members = SlackUserField(many=True, slug_field='slack_id')
+
     class Meta:
         model = Channel
-        fields = ('id', 'name', 'members',)
+        fields = ('id', 'name', 'members')
 
     def create(self, validated_data):
-        channel = Channel.objects.create(channel_id=validated_data['id'], name=validated_data['name'], archive=validated_data['archive'])
-        channel.members =validated_data['members']
+        channel = Channel.objects.create(
+            channel_id=validated_data['id'], name=validated_data['name'], archive=validated_data['archive'])
+        channel.members = validated_data['members']
         channel.save()
         return channel
 
 
 class MessageUploadSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(max_length=10, required=False)
+    user = SlackUserField(many=False, slug_field='slack_id')
+    ts = serializers.FloatField()
 
     class Meta:
         model = Message
-        fields = ('user', 'text')
+        fields = ('user', 'text', 'ts')
 
     def create(self, validated_data):
-        user = validated_data.get("user")
-        channel = validated_data['channel']
-        slack_user = None
-        if user is not None:
-            slack_user = SlackUser.objects.get(
-                archive=channel.archive, slack_id=user)
-        return Message.objects.create(slackuser=slack_user, channel=channel, text=validated_data['text'])
+        return Message.objects.create(slackuser=validated_data['user'], channel=validated_data['channel'], text=validated_data['text'], ts=datetime.datetime.fromtimestamp(validated_data['ts']))
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
@@ -122,14 +122,15 @@ class FileUploadSerializer(serializers.ModelSerializer):
         channels = channel_serializer.save(archive=archive)
         # get messages
         for channel in channels:
-            channel_files = [fileinfo for fileinfo in slack_archive.infolist() if fileinfo.filename.startswith(channel.name)]
+            channel_files = [fileinfo for fileinfo in slack_archive.infolist(
+            ) if fileinfo.filename.startswith(channel.name)]
             for fileinfo in channel_files:
                 if fileinfo.file_size > 0 and fileinfo.filename != 'channels.json':
                     messages_file = slack_archive.open(fileinfo)
                     messages_list = json.load(messages_file)
                     messages_file.close()
                     message_serializer = MessageUploadSerializer(
-                        data=messages_list, many=True)
+                        data=messages_list, many=True, context={'archive': archive})
                     message_serializer.is_valid(
                         raise_exception=True)
                     message_serializer.save(channel=channel)

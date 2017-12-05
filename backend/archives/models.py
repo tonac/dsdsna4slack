@@ -61,8 +61,8 @@ class Channel(models.Model):
     #is_archived = models.BooleanField()
     #is_general = models.BooleanField()
     members = models.ManyToManyField(
-      SlackUser,
-      related_name = 'member',
+        SlackUser,
+        related_name='member',
     )
     #topic = JSONField()
     #purpose = JSONField()
@@ -82,10 +82,10 @@ class Message(models.Model):
     slackuser = models.ForeignKey(
         SlackUser, related_name='messages', on_delete=models.CASCADE, null=True)
     text = models.TextField(blank=True)
-    #ts = models.DateTimeField()
+    ts = models.DateTimeField()
 
     def __str__(self):
         return self.text
 
-    # class Meta:
-    #    ordering = ('ts', )
+    class Meta:
+        ordering = ('ts', )
