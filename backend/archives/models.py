@@ -60,12 +60,10 @@ class Channel(models.Model):
     #    related_name='creator')
     #is_archived = models.BooleanField()
     #is_general = models.BooleanField()
-    # members = models.ManyToManyField(
-    #    SlackUser,
-    #    through = 'Channel_SlackUser',
-    #    through_fields = ('channel_id', 'slack_user_id'),
-    #    related_name = 'member',
-    #)
+    members = models.ManyToManyField(
+      SlackUser,
+      related_name = 'member',
+    )
     #topic = JSONField()
     #purpose = JSONField()
     archive = models.ForeignKey(
@@ -76,10 +74,6 @@ class Channel(models.Model):
 
     class Meta:
         ordering = ('name', )
-
-# class Channel_SlackUser(models.Model):
-#    channel_id = models.ForeignKey(Channel, on_delete=models.CASCADE)
-#    slack_user_id = models.ForeignKey(SlackUser, on_delete=models.CASCADE)
 
 
 class Message(models.Model):

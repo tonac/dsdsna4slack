@@ -35,16 +35,25 @@ class SlackUserUploadSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return SlackUser.objects.create(slack_id=validated_data['id'], team_id=validated_data['team_id'], name=validated_data['name'], archive=validated_data['archive'])
 
+class MemberField(serializers.SlugRelatedField):
+    
+    def get_queryset(self):
+        archive = self.context['archive']
+        queryset = SlackUser.objects.filter(archive=archive)
+        return queryset
 
 class ChannelUploadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(max_length=10)
-
+    members = MemberField(many=True, slug_field = 'slack_id')
     class Meta:
         model = Channel
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'members',)
 
     def create(self, validated_data):
-        return Channel.objects.create(channel_id=validated_data['id'], name=validated_data['name'], archive=validated_data['archive'])
+        channel = Channel.objects.create(channel_id=validated_data['id'], name=validated_data['name'], archive=validated_data['archive'])
+        channel.members =validated_data['members']
+        channel.save()
+        return channel
 
 
 class MessageUploadSerializer(serializers.ModelSerializer):
@@ -64,7 +73,7 @@ class MessageUploadSerializer(serializers.ModelSerializer):
         return Message.objects.create(slackuser=slack_user, channel=channel, text=validated_data['text'])
 
 
-class FileUploadSerializer(serializers.HyperlinkedModelSerializer):
+class FileUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FileUpload
@@ -81,7 +90,7 @@ class FileUploadSerializer(serializers.HyperlinkedModelSerializer):
         archive_files = slack_archive.namelist()
         if 'users.json' not in archive_files or 'channels.json' not in archive_files:
             raise serializers.ValidationError(
-                "Archive must have users and channels files")
+                "Archive must have users.json and channels.json files")
         return value
 
     def create(self, validated_data):
@@ -108,16 +117,14 @@ class FileUploadSerializer(serializers.HyperlinkedModelSerializer):
         channels_file.close()
         # save channels
         channel_serializer = ChannelUploadSerializer(
-            data=channels_list, many=True)
+            data=channels_list, many=True, context={'archive': archive})
         channel_serializer.is_valid(raise_exception=True)
         channels = channel_serializer.save(archive=archive)
-        print(channels)
         # get messages
         for channel in channels:
-            channel_files = [fileinfo for fileinfo in slack_archive.infolist(
-            ) if fileinfo.filename.startswith(channel.name)]
+            channel_files = [fileinfo for fileinfo in slack_archive.infolist() if fileinfo.filename.startswith(channel.name)]
             for fileinfo in channel_files:
-                if fileinfo.file_size > 0:
+                if fileinfo.file_size > 0 and fileinfo.filename != 'channels.json':
                     messages_file = slack_archive.open(fileinfo)
                     messages_list = json.load(messages_file)
                     messages_file.close()
