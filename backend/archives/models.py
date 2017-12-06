@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class FileUpload(models.Model):
@@ -23,69 +23,51 @@ class SlackUser(models.Model):
     slack_id = models.CharField(max_length=10)
     team_id = models.CharField(max_length=10)
     name = models.CharField(max_length=100)
-    #deleted = models.BooleanField()
-    #color = models.CharField(max_length=7)
-    #real_name = models.CharField(max_length=100)
-    ##tz = models.CharField(max_length=100)
-    ##tz_label = models.CharField(max_length=100)
-    ##tz_offset = models.IntegerField()
-    # profile not entered
-    #is_admin = models.BooleanField()
-    #is_owner = models.BooleanField()
-    #is_primary_owner = models.BooleanField()
-    #is_restricted = models.BooleanField()
-    #is_ultra_restricted = models.BooleanField()
-    #is_bot = models.BooleanField()
-    #updated = models.DateTimeField(default=datetime.now())
-    #is_app_user = models.BooleanField()
-    # image
-    archive = models.ForeignKey(
-        Archive, related_name='slackusers', on_delete=models.CASCADE)
+    real_name = models.CharField(max_length=100)
+    archive = models.ForeignKey(Archive, related_name='slack_users', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ('name', )
+        ordering = ('name',)
 
 
 class Channel(models.Model):
     channel_id = models.CharField(max_length=10)
     name = models.CharField(max_length=100)
-    #created = models.DateTimeField(default=datetime.now())
-    # creator = models.ForeignKey(
-    #    SlackUser,
-    #    on_delete=models.SET_NULL,
-    #    null = True,
-    #    related_name='creator')
-    #is_archived = models.BooleanField()
-    #is_general = models.BooleanField()
-    members = models.ManyToManyField(
-        SlackUser,
-        related_name='member',
-    )
-    #topic = JSONField()
-    #purpose = JSONField()
-    archive = models.ForeignKey(
-        Archive, related_name='channels', on_delete=models.CASCADE)
+    members = models.ManyToManyField(SlackUser, related_name='member')
+    archive = models.ForeignKey(Archive, related_name='channels', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ('name', )
+        ordering = ('name',)
+
+
+class Mention(models.Model):
+    archive = models.ForeignKey(Archive, related_name='mention', on_delete=models.CASCADE)
+    mention_sender = models.ForeignKey(SlackUser, related_name='mention_sender', on_delete=models.CASCADE)
+    mention_receiver = models.ForeignKey(SlackUser, related_name='mention_receiver', on_delete=models.CASCADE)
+    mention_channel = models.ForeignKey(Channel, related_name='mention', on_delete=models.CASCADE)
+    number_of_mentions = models.IntegerField(default=0)
+
+    def __str__(self):
+        return '{} mentioned {} {} times in {} channel'.format(
+            self.mention_sender.name,
+            self.mention_receiver.name,
+            self.number_of_mentions,
+            self.mention_channel.name
+        )
 
 
 class Message(models.Model):
-    channel = models.ForeignKey(
-        Channel, related_name='messages', on_delete=models.CASCADE)
-    slackuser = models.ForeignKey(
-        SlackUser, related_name='messages', on_delete=models.CASCADE, null=True)
-    text = models.TextField(blank=True)
+    archive = models.ForeignKey(Archive, related_name='messages', on_delete=models.CASCADE)
+    channel = models.ForeignKey(Channel, related_name='messages', on_delete=models.CASCADE)
+    slack_user = models.ForeignKey(SlackUser, related_name='messages', on_delete=models.CASCADE, null=True)
+    text = models.TextField(blank=True, null=True)
     ts = models.DateTimeField()
 
     def __str__(self):
-        return self.text
-
-    class Meta:
-        ordering = ('ts', )
+        return '{} is sent by {} in {}'.format(self.text, self.slack_user.name, self.channel.name)

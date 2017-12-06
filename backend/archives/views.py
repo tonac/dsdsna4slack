@@ -1,26 +1,27 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status, response
 from rest_framework.parsers import FormParser, MultiPartParser
-from archives.models import Archive, FileUpload
-from archives.serializers import ArchiveSerializer, FileUploadSerializer
+
+from archives.models import Archive
 from archives.permissions import IsArchiveOwner
+from archives.serializers import ArchiveSerializer, FileUploadSerializer
 
 
 class ArchiveViewSet(viewsets.ModelViewSet):
-    serializer_class = ArchiveSerializer
     permission_classes = (permissions.IsAuthenticated, IsArchiveOwner,)
-    http_method_names = ['get', 'head', 'delete']
+    parser_classes = (MultiPartParser, FormParser,)
+    http_method_names = ['get', 'head', 'delete', 'post']
 
     def get_queryset(self):
         return Archive.objects.filter(user=self.request.user)
 
+    def get_serializer_class(self):
+        if self.action in 'create':
+            return FileUploadSerializer
+        else:
+            return ArchiveSerializer
 
-class FileUploadViewSet (viewsets.ModelViewSet):
-    queryset = FileUpload.objects.all()
-    serializer_class = FileUploadSerializer
-    parser_classes = (MultiPartParser, FormParser,)
-    permission_classes = (permissions.IsAuthenticated, IsArchiveOwner,)
-
-    def perform_create(self, serializer):
-        # deserialize data and save to db
-        serializer.save(user=self.request.user,
-                        datafile=self.request.data.get('datafile'))
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        archive = serializer.save(user=self.request.user)
+        return response.Response(ArchiveSerializer(archive).data, status=status.HTTP_201_CREATED)

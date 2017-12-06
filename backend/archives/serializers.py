@@ -1,8 +1,11 @@
 import json
+import re
 import zipfile
-import datetime
+
+from django.utils import timezone
 from rest_framework import serializers
-from archives.models import Archive, SlackUser, Channel, Message, FileUpload
+
+from archives.models import Archive, SlackUser, Channel, Message
 
 
 class ChannelSerializer(serializers.ModelSerializer):
@@ -19,7 +22,6 @@ class SlackUserSerializer(serializers.ModelSerializer):
 
 class ArchiveSerializer(serializers.ModelSerializer):
     channels = ChannelSerializer(read_only=True, many=True)
-    #slackusers = SlackUserSerializer(read_only=True, many=True)
 
     class Meta:
         model = Archive
@@ -28,13 +30,20 @@ class ArchiveSerializer(serializers.ModelSerializer):
 
 class SlackUserUploadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(max_length=10)
+    is_bot = serializers.BooleanField()
 
     class Meta:
         model = SlackUser
-        fields = ('id', 'team_id', 'name')
+        fields = ('id', 'team_id', 'name', 'is_bot')
 
     def create(self, validated_data):
-        return SlackUser.objects.create(slack_id=validated_data['id'], team_id=validated_data['team_id'], name=validated_data['name'], archive=validated_data['archive'])
+        # if not validated_data['is_bot']:
+        return SlackUser.objects.create(
+            slack_id=validated_data['id'],
+            team_id=validated_data['team_id'],
+            name=validated_data['name'],
+            archive=validated_data['archive']
+        )
 
 
 class SlackUserField(serializers.SlugRelatedField):
@@ -55,7 +64,10 @@ class ChannelUploadSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         channel = Channel.objects.create(
-            channel_id=validated_data['id'], name=validated_data['name'], archive=validated_data['archive'])
+            channel_id=validated_data['id'],
+            name=validated_data['name'],
+            archive=validated_data['archive']
+        )
         channel.members = validated_data['members']
         channel.save()
         return channel
@@ -70,68 +82,75 @@ class MessageUploadSerializer(serializers.ModelSerializer):
         fields = ('user', 'text', 'ts')
 
     def create(self, validated_data):
-        return Message.objects.create(slackuser=validated_data.get('user'), channel=validated_data['channel'], text=validated_data['text'], ts=datetime.datetime.fromtimestamp(validated_data['ts']))
+        # We are take only messages with user in account
+        if validated_data.get('user') in validated_data['users']:
+            return Message.objects.create(
+                slack_user=validated_data.get('user'),
+                channel=validated_data['channel'],
+                text=validated_data['text'],
+                archive=validated_data['archive'],
+                ts=timezone.datetime.fromtimestamp(validated_data['ts']).astimezone()
+            )
 
 
-class FileUploadSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FileUpload
-        fields = ('datafile',)
+class FileUploadSerializer(serializers.Serializer):
+    datafile = serializers.FileField()
 
     def validate_datafile(self, value):
-        try:
-            slack_archive = zipfile.ZipFile(value)
-        except zipfile.BadZipFile:
+        if not zipfile.is_zipfile(value):
             raise serializers.ValidationError("Archive is not a zip file")
+
+        slack_archive = zipfile.ZipFile(value)
+
         if slack_archive.testzip() is not None:
-            raise serializers.ValidationError(
-                "Archive is not a valid zip file")
+            raise serializers.ValidationError("Archive is not a valid zip file")
         archive_files = slack_archive.namelist()
+
         if 'users.json' not in archive_files or 'channels.json' not in archive_files:
-            raise serializers.ValidationError(
-                "Archive must have users.json and channels.json files")
+            raise serializers.ValidationError("Archive must have users.json and channels.json files")
+
         return value
 
-    def create(self, validated_data):
-        file_upload = FileUpload.objects.create(**validated_data)
-        # create archive instance
-        slack_archive = zipfile.ZipFile(file_upload.datafile)
-        archive_serializer = ArchiveSerializer(
-            data={'name': slack_archive.filename})
+    def save_archive(self, archive_zip_file, user):
+        archive_serializer = ArchiveSerializer(data={'name': archive_zip_file.filename})
         archive_serializer.is_valid(raise_exception=True)
-        archive = archive_serializer.save(user=file_upload.user)
-        # extract data from archive
-        # get users
-        users_file = slack_archive.open('users.json')
-        users_list = json.load(users_file)
-        users_file.close()
-        # save users
-        slack_user_serializer = SlackUserUploadSerializer(
-            data=users_list, many=True)
+        return archive_serializer.save(user=user)
+
+    def save_users(self, archive_zip_file, archive):
+        with archive_zip_file.open('users.json') as users_file:
+            slack_user_serializer = SlackUserUploadSerializer(data=json.load(users_file), many=True)
         slack_user_serializer.is_valid(raise_exception=True)
-        slack_user_serializer.save(archive=archive)
-        # get channels
-        channels_file = slack_archive.open('channels.json')
-        channels_list = json.load(channels_file)
-        channels_file.close()
-        # save channels
-        channel_serializer = ChannelUploadSerializer(
-            data=channels_list, many=True, context={'archive': archive})
+        return slack_user_serializer.save(archive=archive)
+
+    def save_channels(self, archive_zip_file, archive):
+        with archive_zip_file.open('channels.json') as channels_file:
+            channel_serializer = ChannelUploadSerializer(
+                data=json.load(channels_file),
+                many=True,
+                context={'archive': archive}
+            )
         channel_serializer.is_valid(raise_exception=True)
-        channels = channel_serializer.save(archive=archive)
-        # get messages
+        return channel_serializer.save(archive=archive)
+
+    def save_messages(self, archive_zip_file, archive, channels, users):
         for channel in channels:
-            channel_files = [fileinfo for fileinfo in slack_archive.infolist(
-            ) if fileinfo.filename.startswith(channel.name)]
-            for fileinfo in channel_files:
-                if fileinfo.file_size > 0 and fileinfo.filename != 'channels.json':
-                    messages_file = slack_archive.open(fileinfo)
-                    messages_list = json.load(messages_file)
-                    messages_file.close()
+            pattern = '^%s/[\d]{4}-[\d]{2}-[\d]{2}.json' % channel.name
+
+            for channel_file in filter(lambda file_name: re.match(pattern, file_name), archive_zip_file.namelist()):
+                with archive_zip_file.open(channel_file) as messages_file:
                     message_serializer = MessageUploadSerializer(
-                        data=messages_list, many=True, context={'archive': archive})
-                    message_serializer.is_valid(
-                        raise_exception=True)
-                    message_serializer.save(channel=channel)
-        return file_upload
+                        data=json.load(messages_file),
+                        many=True,
+                        context={'archive': archive, 'users': users}
+                    )
+                message_serializer.is_valid(raise_exception=True)
+                message_serializer.save(archive=archive, channel=channel, users=users)
+
+    def save(self, user):
+        with zipfile.ZipFile(self.validated_data['datafile']) as archive_zip_file:
+            archive = self.save_archive(archive_zip_file, user)
+            users = self.save_users(archive_zip_file, archive)
+            channels = self.save_channels(archive_zip_file, archive)
+            self.save_messages(archive_zip_file, archive, channels, users)
+
+        return archive
