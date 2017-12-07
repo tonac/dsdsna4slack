@@ -5,7 +5,7 @@ import zipfile
 from django.utils import timezone
 from rest_framework import serializers
 
-from archives.models import Archive, SlackUser, Channel, Message
+from archives.models import Archive, SlackUser, Channel, Message, Mention
 
 
 class ChannelSerializer(serializers.ModelSerializer):
@@ -84,6 +84,12 @@ class MessageUploadSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # We are take only messages with user in account
         if validated_data.get('user') in validated_data['users']:
+            self.get_mentions_from_message(
+                validated_data['text'],
+                validated_data.get('user'),
+                validated_data['archive'],
+                validated_data['channel']
+            )
             return Message.objects.create(
                 slack_user=validated_data.get('user'),
                 channel=validated_data['channel'],
@@ -91,6 +97,18 @@ class MessageUploadSerializer(serializers.ModelSerializer):
                 archive=validated_data['archive'],
                 ts=timezone.datetime.fromtimestamp(validated_data['ts']).astimezone()
             )
+
+    def get_mentions_from_message(self, text, sender, archive, channel):
+        pattern = '<@([A-Z0-9]*)>'
+        # TODO: SlackUser can raise error if not in database if not there someone zip is invalid, return input invalid
+        for mention_receiver in re.finditer(pattern, text):
+            mention = Mention.objects.get_or_create(
+                archive=archive,
+                mention_sender=sender,
+                mention_receiver=SlackUser.objects.get(archive=archive, slack_id=mention_receiver.group(1)),
+                mention_channel=channel)[0]
+            mention.number_of_mentions += 1
+            mention.save()
 
 
 class FileUploadSerializer(serializers.Serializer):

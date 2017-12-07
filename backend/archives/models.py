@@ -2,11 +2,6 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class FileUpload(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    datafile = models.FileField()
-
-
 class Archive(models.Model):
     name = models.CharField(max_length=100)
     uploaded = models.DateTimeField(auto_now_add=True)
