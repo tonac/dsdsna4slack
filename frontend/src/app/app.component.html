@@ -1,3 +1,11 @@
 <app-alert></app-alert>
 <router-outlet></router-outlet>
-<app-spinner [loadingText]="'Please wait...'"> </app-spinner>
+<spinner name="dsdSpinner">
+  <div class="spinner center">
+    <div style="color: #64d6e2" class="la-ball-clip-rotate-multiple la-3x">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+</spinner>

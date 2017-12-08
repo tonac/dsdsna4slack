@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthenticationService} from "../../services/authentication.service";
 import {AlertService} from "../../services/alert.service";
-import {Ng4LoadingSpinnerService} from "ng4-loading-spinner";
+import { SpinnerService } from '@chevtek/angular-spinners';
 
 @Component({
   moduleId: module.id,
@@ -17,7 +17,7 @@ export class HomeComponent implements OnInit {
   usernameErrorList = [];
   passwordErrorList = [];
 
-  constructor(private spinnerService: Ng4LoadingSpinnerService,
+  constructor(private spinnerService: SpinnerService,
               private route: ActivatedRoute,
               private router: Router,
               private authenticationService: AuthenticationService,
@@ -31,10 +31,11 @@ export class HomeComponent implements OnInit {
   }
 
   login() {
-    this.spinnerService.show();
+    this.spinnerService.show('dsdSpinner');
     this.authenticationService.login(this.model.username, this.model.password)
       .subscribe(
         data => {
+          this.spinnerService.hide('dsdSpinner');
           this.router.navigate([this.returnUrl]);
         },
         error => {
@@ -49,7 +50,7 @@ export class HomeComponent implements OnInit {
             this.alertService.error("Form has errors, fix them and try again!");
           }
           console.log(json);
-          this.spinnerService.hide();
+          this.spinnerService.hide('dsdSpinner');
         });
   }
 }
