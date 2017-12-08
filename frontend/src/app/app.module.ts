@@ -21,7 +21,7 @@ import {ShareComponent} from './main/dashboard/share/share.component';
 import {ArchiveService} from './services/archive.service';
 import {ResultService} from './services/result.service';
 import { NetworkVisComponent } from './main/dashboard/results/network-vis/network-vis.component';
-import { Ng4LoadingSpinnerModule } from 'ng4-loading-spinner';
+import { SpinnerModule } from '@chevtek/angular-spinners';
 
 let homeState = {name: 'home', url: '/', component: HomeComponent};
 let registerState = {name: 'register', url: '/register', component: RegisterComponent};
@@ -33,7 +33,7 @@ let registerState = {name: 'register', url: '/register', component: RegisterComp
     ReactiveFormsModule,
     HttpModule,
     NgbModule.forRoot(),
-    Ng4LoadingSpinnerModule,
+    SpinnerModule,
     routing
   ],
   declarations: [

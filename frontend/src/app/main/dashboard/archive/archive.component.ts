@@ -3,7 +3,7 @@ import 'rxjs/Rx';
 import {Archive} from '../../../model/archive';
 import {ArchiveService} from '../../../services/archive.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {Ng4LoadingSpinnerService} from 'ng4-loading-spinner';
+import { SpinnerService } from '@chevtek/angular-spinners';
 import {AlertService} from '../../../services/alert.service';
 
 @Component({
@@ -17,7 +17,7 @@ export class ArchiveComponent implements OnInit {
   archives: Array<Archive>;
 
 
-  constructor(private spinnerService: Ng4LoadingSpinnerService, private alertService: AlertService,
+  constructor(private spinnerService: SpinnerService, private alertService: AlertService,
               private archiveService: ArchiveService, private fb: FormBuilder) {
     this.form = this.fb.group({
       filename: ['', Validators.required],
@@ -27,7 +27,7 @@ export class ArchiveComponent implements OnInit {
 
   ngOnInit() {
     this.hasArchives = false;
-    this.spinnerService.show();
+    this.spinnerService.show('dsdSpinner');
 
     this.archiveService.getAllForUser()
       .subscribe({
@@ -35,10 +35,10 @@ export class ArchiveComponent implements OnInit {
           o => {
             this.hasArchives = o.length != 0;
             this.archives = o;
-            this.spinnerService.hide();
+            this.spinnerService.hide('dsdSpinner');
           },
         error: error => {
-          this.spinnerService.hide();
+          this.spinnerService.hide('dsdSpinner');
           this.alertService.error('Error while fetching archives: ' + error);
         }
       });
@@ -69,7 +69,7 @@ export class ArchiveComponent implements OnInit {
   }
 
   addToArchives(archive: string) {
-    this.spinnerService.show();
+    this.spinnerService.show('dsdSpinner');
     this.archiveService.addNew(this.form.value, archive).subscribe(
       data => {
         data.name = archive;
@@ -79,10 +79,10 @@ export class ArchiveComponent implements OnInit {
           this.hasArchives = true;
           this.archives = [data];
         }
-        this.spinnerService.hide();
+        this.spinnerService.hide('dsdSpinner');
       },
       error => {
-        this.spinnerService.hide();
+        this.spinnerService.hide('dsdSpinner');
         this.alertService.error('Error when adding new archive: ' + error);
       });
   }

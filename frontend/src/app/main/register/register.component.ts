@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {UserService} from '../../services/user.service';
 import {AlertService} from '../../services/alert.service';
-import {Ng4LoadingSpinnerService} from 'ng4-loading-spinner';
+import { SpinnerService } from '@chevtek/angular-spinners';
 
 
 @Component({
@@ -19,18 +19,19 @@ export class RegisterComponent {
   usernameErrorList = [];
   passwordErrorList = [];
 
-  constructor(private spinnerService: Ng4LoadingSpinnerService,
+  constructor(private spinnerService: SpinnerService,
               private router: Router,
               private userService: UserService,
               private alertService: AlertService) {
   }
 
   register() {
-    this.spinnerService.show();
+    this.spinnerService.show('dsdSpinner');
     this.userService.create(this.model)
       .subscribe(
         data => {
           this.alertService.success('Registration successful', true);
+          this.spinnerService.hide('dsdSpinner');
           this.router.navigate(['/']);
         },
         // TODO: errors are not showing to user? where? how?
@@ -47,7 +48,7 @@ export class RegisterComponent {
           } else {
             this.alertService.error('Form has errors, fix them and try again!');
           }
-          this.spinnerService.hide();
+          this.spinnerService.hide('dsdSpinner');
         });
   }
 }
