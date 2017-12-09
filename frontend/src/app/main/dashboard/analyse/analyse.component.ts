@@ -3,6 +3,8 @@ import { Observable } from 'rxjs/Observable';
 import { Archive } from '../../../model/archive';
 import { Channel } from '../../../model/channel';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ArchiveService } from '../../../services/archive.service';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'app-analyse',
@@ -11,59 +13,65 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 })
 export class AnalyseComponent implements OnInit {
   loading: boolean;
-  archives: Observable<Array<Archive>>;
-
-  archivesArray: Array<Archive>;
-  archivesSubject: BehaviorSubject<Array<Archive>>;
-
-  channelsArray: Array<Channel>;
-  channelsSubject: BehaviorSubject<Array<Channel>>;
-
+  archives: Array<Archive>;
+  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
+  channels: Array<any>;
   selectedArchive: number;
   selectedGraphType: number;
 
-  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
+  channelsSubject: BehaviorSubject<Array<Channel>>;
+  selectedArchiveSubject: BehaviorSubject<number>;
 
-  channels: Array<any>;
-
-  constructor() { }
+  constructor(private archiveService: ArchiveService, private alertService: AlertService) { }
 
   ngOnInit() {
-    var tmpArchive: Archive = new Archive();
-    tmpArchive.id = 0;
-    tmpArchive.name = 'Select your archive';
-
-    var tmpArchive2: Archive = new Archive();
-    tmpArchive2.id = 1;
-    tmpArchive2.name = 'DSD-sna4slack2';
-    tmpArchive2.uploaded = new Date(2017, 11, 10, 0,0,0,0).toDateString();
-
-    this.archivesArray = [tmpArchive, tmpArchive2];
-    this.archivesSubject = new BehaviorSubject<Array<Archive>>(this.archivesArray);
-    this.archives = this.archivesSubject.asObservable();
-
     this.selectedArchive = -1;
     this.selectedGraphType = 0;
 
     this.channelsSubject = new BehaviorSubject<Array<Channel>>([]);
-
-    this.channelsSubject.subscribe({next: incomingChannels => {
-      this.channels = [];
-      for(let chan of incomingChannels){
-        this.channels.push({checked: false, channel: chan});
-        console.log(chan.id);
-      }
-    }});
+    this.selectedArchiveSubject = new BehaviorSubject<number>(null);
 
 
+    this.archiveService.getAllForUser()
+      .subscribe({
+        next:
+          o => {
+            this.archives = o;
+          },
+        error: error => {
+          this.alertService.error('Error while fetching archives: ' + error);
+        }
+      });
+
+    
+    this.selectedArchiveSubject
+      .subscribe({
+        next: archiveId => {
+          this.addChannels(archiveId);        
+        },
+        error: error => {
+          this.alertService.error('Error when selecting archive: ' + error);
+        }
+      });
+
+    this.channelsSubject
+      .subscribe({next: incomingChannels => {
+        this.channels = [];
+        for(let chan of incomingChannels){
+          this.channels.push({checked: false, channel: chan});
+          console.log(chan.id);
+        }
+      }});
   }
 
-  addChannels() {
+  addChannels(forArchiveId: number) {
+    if (forArchiveId != null) {
     this.channelsSubject.next([
       new Channel(0, 'all'),
       new Channel(1, '#general'),
       new Channel(2, '#random')
     ]);
+  }
   }
 
   removeChannels() {
@@ -71,11 +79,7 @@ export class AnalyseComponent implements OnInit {
   }
 
   selectArchive(archiveID: number){
-    if(archiveID === 0){
-      this.removeChannels();
-    } else {
-      this.addChannels();
-    }
+    this.selectedArchiveSubject.next(archiveID);
   }
 
   selectGraphType(graphType: number){

@@ -5,7 +5,7 @@
     
     <div class="form-group">
         <select class="selectpicker form-control" [(ngModel)]="selectedArchive" name="selectOption" (ngModelChange)="selectArchive($event)">
-            <option *ngFor="let archive of archives | async" value="{{archive.id}}" [attr.selected]="archive.id == 0 ? true : null"> 
+            <option *ngFor="let archive of archives" value="{{archive.id}}" [attr.selected]="archive.id == 0 ? true : null"> 
             {{archive.name}} 
             </option>
         </select>
