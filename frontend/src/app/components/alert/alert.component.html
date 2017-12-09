@@ -1,4 +1,5 @@
 <div *ngIf="message"
      [ngClass]="{ 'alert': message, 'alert-success': message.type === 'success', 'alert-danger': message.type === 'error' }">
-  {{message.text}}
+  <span>{{message.text}}</span>
+  <button class="btn btn-danger pull-right" style="font:&#10006;" (click)="close()">x</button>
 </div>

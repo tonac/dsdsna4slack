@@ -20,10 +20,12 @@ export class ArchiveService {
     });
   }
 
-  addNew(form, filename): Observable<Archive> {
-    return this.http.post('/api/upload/',
-      {file: form.file.value},
-      this.userService.jwt(filename)).map((response: Response) => {
+  addNew(file): Observable<Archive> {
+    const formData = new FormData();
+    formData.append('datafile', file);
+    return this.http.post('/api/archives/',
+      formData,
+      this.userService.jwt()).map((response: Response) => {
       let archive = response.json() as Archive;
       return archive;
     });
@@ -31,7 +33,7 @@ export class ArchiveService {
     // return this.http.request(new Request(new BaseRequestOptions().merge({
     //   method: 'post',
     //   url: '/api/archives/',
-    //   body: formData,
+    //   body: file,
     //   headers: this.userService.jwt().headers
     // })))
     //   .map((response: Response) => {
