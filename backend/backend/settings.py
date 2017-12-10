@@ -42,8 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     'authentication',
-
-    'archives',
+    'archive',
 ]
 
 MIDDLEWARE = [
@@ -82,9 +81,18 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dsd',
+        'USER': 'dsd',
+        'PASSWORD': 'dsdLozinkaMuySegura',
+        'HOST': 'postgres',
+        'PORT': '5432',
     }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
 }
 
 
@@ -133,5 +141,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    #'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'TEST_REQUEST_RENDERER_CLASSES': (
+        'rest_framework.renderers.MultiPartRenderer',
+        'rest_framework.renderers.JSONRenderer',
+    )
 }

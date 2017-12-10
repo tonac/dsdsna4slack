@@ -97,6 +97,8 @@ ENV/
 staticfiles
 
 node_modules
+package-lock.json
 gradlew
 gradlew\.bat
 postgresql
+

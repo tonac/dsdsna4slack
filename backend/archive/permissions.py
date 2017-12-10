@@ -1,8 +1,8 @@
 from rest_framework import permissions
-from archives.models import Archive, FileUpload
+from archive.models import Archive
 
 
 class IsArchiveOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return ((isinstance(obj, Archive) or isinstance(obj, FileUpload))
+        return ((isinstance(obj, Archive))
                 and obj.user == request.user)
