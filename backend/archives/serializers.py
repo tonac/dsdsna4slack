@@ -3,6 +3,7 @@ import re
 import zipfile
 
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from archives.models import Archive, SlackUser, Channel, Message, Mention
@@ -37,13 +38,14 @@ class SlackUserUploadSerializer(serializers.ModelSerializer):
         fields = ('id', 'team_id', 'name', 'is_bot')
 
     def create(self, validated_data):
-        # if not validated_data['is_bot']:
-        return SlackUser.objects.create(
-            slack_id=validated_data['id'],
-            team_id=validated_data['team_id'],
-            name=validated_data['name'],
-            archive=validated_data['archive']
-        )
+        if not validated_data['is_bot']:
+            return SlackUser.objects.create(
+                slack_id=validated_data['id'],
+                team_id=validated_data['team_id'],
+                name=validated_data['name'],
+                archive=validated_data['archive']
+            )
+        return None
 
 
 class SlackUserField(serializers.SlugRelatedField):
@@ -53,10 +55,18 @@ class SlackUserField(serializers.SlugRelatedField):
         queryset = SlackUser.objects.filter(archive=archive)
         return queryset
 
+    def to_internal_value(self, data):
+        try:
+            return self.get_queryset().get(**{self.slug_field: data})
+        except ObjectDoesNotExist:
+            return None
+        except (TypeError, ValueError):
+            self.fail('invalid')
+
 
 class ChannelUploadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(max_length=10)
-    members = SlackUserField(many=True, slug_field='slack_id')
+    members = SlackUserField(many=True, slug_field='slack_id', allow_null=True)
 
     class Meta:
         model = Channel
@@ -68,13 +78,15 @@ class ChannelUploadSerializer(serializers.ModelSerializer):
             name=validated_data['name'],
             archive=validated_data['archive']
         )
-        channel.members = validated_data['members']
+        members = [m for m in validated_data['members'] if m is not None]
+        channel.members = members
         channel.save()
         return channel
 
 
 class MessageUploadSerializer(serializers.ModelSerializer):
-    user = SlackUserField(many=False, slug_field='slack_id', required=False)
+    user = SlackUserField(many=False, slug_field='slack_id',
+                          required=False, allow_null=True)
     ts = serializers.FloatField()
 
     class Meta:
@@ -82,8 +94,8 @@ class MessageUploadSerializer(serializers.ModelSerializer):
         fields = ('user', 'text', 'ts')
 
     def create(self, validated_data):
-        # We are take only messages with user in account
-        if validated_data.get('user') in validated_data['users']:
+        # We take only messages with user in account
+        if validated_data.get('user') is not None:
             self.get_mentions_from_message(
                 validated_data['text'],
                 validated_data.get('user'),
@@ -95,20 +107,25 @@ class MessageUploadSerializer(serializers.ModelSerializer):
                 channel=validated_data['channel'],
                 text=validated_data['text'],
                 archive=validated_data['archive'],
-                ts=timezone.datetime.fromtimestamp(validated_data['ts']).astimezone()
+                ts=timezone.datetime.fromtimestamp(
+                    validated_data['ts']).astimezone()
             )
 
     def get_mentions_from_message(self, text, sender, archive, channel):
         pattern = '<@([A-Z0-9]*)>'
         # TODO: SlackUser can raise error if not in database if not there someone zip is invalid, return input invalid
         for mention_receiver in re.finditer(pattern, text):
-            mention = Mention.objects.get_or_create(
-                archive=archive,
-                mention_sender=sender,
-                mention_receiver=SlackUser.objects.get(archive=archive, slack_id=mention_receiver.group(1)),
-                mention_channel=channel)[0]
-            mention.number_of_mentions += 1
-            mention.save()
+            try:
+                mention = Mention.objects.get_or_create(
+                    archive=archive,
+                    mention_sender=sender,
+                    mention_receiver=SlackUser.objects.get(
+                        archive=archive, slack_id=mention_receiver.group(1)),
+                    mention_channel=channel)[0]
+                mention.number_of_mentions += 1
+                mention.save()
+            except ObjectDoesNotExist:
+                pass
 
 
 class FileUploadSerializer(serializers.Serializer):
@@ -121,22 +138,26 @@ class FileUploadSerializer(serializers.Serializer):
         slack_archive = zipfile.ZipFile(value)
 
         if slack_archive.testzip() is not None:
-            raise serializers.ValidationError("Archive is not a valid zip file")
+            raise serializers.ValidationError(
+                "Archive is not a valid zip file")
         archive_files = slack_archive.namelist()
 
         if 'users.json' not in archive_files or 'channels.json' not in archive_files:
-            raise serializers.ValidationError("Archive must have users.json and channels.json files")
+            raise serializers.ValidationError(
+                "Archive must have users.json and channels.json files")
 
         return value
 
     def save_archive(self, archive_zip_file, user):
-        archive_serializer = ArchiveSerializer(data={'name': archive_zip_file.filename})
+        archive_serializer = ArchiveSerializer(
+            data={'name': archive_zip_file.filename})
         archive_serializer.is_valid(raise_exception=True)
         return archive_serializer.save(user=user)
 
     def save_users(self, archive_zip_file, archive):
         with archive_zip_file.open('users.json') as users_file:
-            slack_user_serializer = SlackUserUploadSerializer(data=json.load(users_file), many=True)
+            slack_user_serializer = SlackUserUploadSerializer(
+                data=json.load(users_file), many=True)
         slack_user_serializer.is_valid(raise_exception=True)
         return slack_user_serializer.save(archive=archive)
 
@@ -162,7 +183,8 @@ class FileUploadSerializer(serializers.Serializer):
                         context={'archive': archive, 'users': users}
                     )
                 message_serializer.is_valid(raise_exception=True)
-                message_serializer.save(archive=archive, channel=channel, users=users)
+                message_serializer.save(
+                    archive=archive, channel=channel, users=users)
 
     def save(self, user):
         with zipfile.ZipFile(self.validated_data['datafile']) as archive_zip_file:
