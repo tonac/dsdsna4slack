@@ -97,8 +97,12 @@ ENV/
 staticfiles
 
 node_modules
+package-lock.json
 gradlew
 gradlew\.bat
 postgresql
 
+<<<<<<< HEAD
 frontend/package-lock.json
+=======
+>>>>>>> analysis

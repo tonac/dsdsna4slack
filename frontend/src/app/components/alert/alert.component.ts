@@ -18,4 +18,8 @@ export class AlertComponent implements OnInit {
     });
   }
 
+  close() {
+    this.message = undefined;
+  }
+
 }

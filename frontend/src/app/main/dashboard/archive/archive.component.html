@@ -14,40 +14,39 @@
     <div class="col-md-2" style="text-align:center">
       <i (click)='add()' class="fa fa-plus-circle fa-5x" aria-hidden="true"></i>
       <br><br>
-      <i  *ngIf="!this.hasArchives" class="fa fa-reply fa-rotate-90 fa-5x" aria-hidden="true"></i>
+      <i *ngIf="!this.hasArchives" class="fa fa-reply fa-rotate-90 fa-5x" aria-hidden="true"></i>
     </div>
   </div>
 
   <div *ngIf="hasArchives" style="width:100%">
     <table class="table-striped archives_table" name="archivesTable" style="width:inherit;">
       <thead>
-        <th> Archive name </th>
-        <th> Uploaded </th>
-        <th>  </th>
+      <th> Archive name</th>
+      <th> Uploaded</th>
+      <th></th>
       </thead>
       <tbody>
-        <tr *ngFor='let archive of archives'>
-          <td> {{archive.name}} </td>
-          <td> {{archive.uploaded | date}} </td>
-          <td> <i (click)='delete(archive)' class="fa fa-trash fa-2x" aria-hidden="true"></i> </td>
-        </tr>
+      <tr *ngFor='let archive of archives'>
+        <td> {{archive.name}}</td>
+        <td> {{archive.uploaded | date}}</td>
+        <td><i (click)='delete(archive)' class="fa fa-trash fa-2x" aria-hidden="true"></i></td>
+      </tr>
       </tbody>
     </table>
   </div>
 
   <!-- The Modal -->
-<div id="myModal" class="modal">
+  <div id="myModal" class="modal">
 
     <!-- Modal content -->
     <div class="modal-content">
       <div style="justify-content: flex-end;"><span (click)="closePopup()" class="close">&times;</span></div>
 
-      <form [formGroup]="form" name="form" (ngSubmit)="form.valid && submit()" novalidate  enctype="multipart/form-data">
+      <form [formGroup]="form" name="form" (ngSubmit)="form.valid && submit()" novalidate enctype="multipart/form-data">
         <div class="form-group">
           <label>Choose from file</label>
           <br/>
-          <input id="file" type="file" name="file" (change)="onFileChange($event)"/>
-          <input id="name" type="text" name="name" hidden/>
+          <input id="datafile" type="file" name="datafile" (change)="onFileChange($event)"/>
         </div>
         <div class="form-group" style="justify-content: flex-end;display: flex;">
           <button class="btn btn-primary">Submit</button>

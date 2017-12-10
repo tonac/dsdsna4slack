@@ -3,7 +3,7 @@ import 'rxjs/Rx';
 import {Archive} from '../../../model/archive';
 import {ArchiveService} from '../../../services/archive.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import { SpinnerService } from '@chevtek/angular-spinners';
+import {SpinnerService} from '@chevtek/angular-spinners';
 import {AlertService} from '../../../services/alert.service';
 
 @Component({
@@ -60,19 +60,21 @@ export class ArchiveComponent implements OnInit {
 
   submit() {
     this.closePopup();
-    var f = (<HTMLInputElement>document.getElementById('file')).files[0];
-    this.addToArchives(f.name);
+    var file = (<HTMLInputElement>document.getElementById('datafile')).files[0];
+    const formData = new FormData();
+    formData.append('datafile', file);
+    this.addToArchives(file);
   }
 
   closePopup() {
     document.getElementById('myModal').style.display = 'none';
   }
 
-  addToArchives(archive: string) {
+  addToArchives(file) {
     this.spinnerService.show('dsdSpinner');
-    this.archiveService.addNew(this.form.value, archive).subscribe(
+    this.archiveService.addNew(file).subscribe(
       data => {
-        data.name = archive;
+        data.name = file.name;
         if (this.archives && this.archives.length) {
           this.archives.push(data);
         } else {

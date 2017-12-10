@@ -3,6 +3,10 @@ version: "3.4"
 services:
   postgres:
     image: postgres:10.1-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: dsd
+      POSTGRES_PASSWORD: dsdLozinkaMuySegura
     ports:
       - "5432:5432"
     volumes:

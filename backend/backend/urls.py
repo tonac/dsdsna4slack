@@ -23,6 +23,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^apis/$', views.api_root),
     url(r'^api/authentication/', include('authentication.urls')),
-    url(r'^api/', include('archives.urls')),
+    url(r'^api/archive/', include('archive.urls')),
     url(r'^docs/', include_docs_urls(title='SNA 4 Slack APIs', public=True)),
 ]
