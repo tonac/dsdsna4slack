@@ -1,5 +1,5 @@
 from django.contrib import admin
-from archives.models import Archive, SlackUser, Channel, Message, Mention
+from archive.models import Archive, SlackUser, Channel, Message, Mention
 
 # Register your models here.
 admin.site.register(Archive)

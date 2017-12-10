@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from archives.models import Archive
+from archive.models import Archive
 
 
 class IsArchiveOwner(permissions.BasePermission):

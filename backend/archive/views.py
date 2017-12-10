@@ -1,9 +1,9 @@
 from rest_framework import viewsets, permissions, status, response
 from rest_framework.parsers import FormParser, MultiPartParser
 
-from archives.models import Archive
-from archives.permissions import IsArchiveOwner
-from archives.serializers import ArchiveSerializer, FileUploadSerializer
+from archive.models import Archive
+from archive.permissions import IsArchiveOwner
+from archive.serializers import ArchiveSerializer, FileUploadSerializer
 
 
 class ArchiveViewSet(viewsets.ModelViewSet):

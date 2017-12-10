@@ -12,7 +12,7 @@ export class ArchiveService {
 
   getAllForUser(): Observable<Array<Archive>> {
     return this.http.get(
-      '/api/archives/',
+      '/api/archive/v1/archive/',
       this.userService.jwt()
     ).map((response: Response) => {
       let archives = response.json() as Archive[];
@@ -23,7 +23,7 @@ export class ArchiveService {
   addNew(file): Observable<Archive> {
     const formData = new FormData();
     formData.append('datafile', file);
-    return this.http.post('/api/archives/',
+    return this.http.post('/api/archive/v1/archive/',
       formData,
       this.userService.jwt()).map((response: Response) => {
       let archive = response.json() as Archive;
