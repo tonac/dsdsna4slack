@@ -14,9 +14,10 @@ import { AlertService } from '../../../services/alert.service';
 })
 export class AnalyseComponent implements OnInit {
   loading: boolean;
+
   archives: Array<Archive>;
-  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
   channels: Array<any>;
+
   selectedGraphType: number;
   selectedArchive: number;
 
@@ -25,26 +26,26 @@ export class AnalyseComponent implements OnInit {
   channelsSubject: BehaviorSubject<Array<Channel>>;
   selectedArchiveSubject: BehaviorSubject<number>;
 
+  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
+
   constructor(private archiveService: ArchiveService, private alertService: AlertService) { }
 
   ngOnInit() {
     this.channelsForArchive[-1] = new Array<Channel>();
     this.selectedGraphType = 0;
-
     this.channelsSubject = new BehaviorSubject<Array<Channel>>([]);
     this.selectedArchiveSubject = new BehaviorSubject<number>(null);
 
+    this.archives = new Array<Archive>();
 
     this.archiveService.getAllForUser()
+      .flatMap((archive, index) => archive)
       .subscribe({
         next:
-          o => {
-            this.archives = o;
-            for (var archive of o) {
-              var tmpChannels = [new Channel(-1, 'all')];
-              tmpChannels = tmpChannels.concat(archive.channels);
-              this.channelsForArchive[archive.id] = tmpChannels;
-            }
+          archive => {
+            this.archives.push(archive);
+            this.channelsForArchive[archive.id] = 
+              [new Channel(-1, 'ALL')].concat(archive.channels);
           },
         error: error => {
           this.alertService.error('Error while fetching archives: ' + error);
@@ -55,8 +56,11 @@ export class AnalyseComponent implements OnInit {
     this.selectedArchiveSubject
       .subscribe({
         next: archiveId => {
-          this.channelsSubject.next(this.channelsForArchive[archiveId]); 
-          console.log("archive selected" + archiveId); 
+          this.channels = [];
+          if(this.channelsForArchive[archiveId]) {
+            this.channelsSubject.next(this.channelsForArchive[archiveId]); 
+            console.log("archive selected" + archiveId);
+          }
         },
         error: error => {
           this.alertService.error('Error when selecting archive: ' + error);
@@ -64,13 +68,12 @@ export class AnalyseComponent implements OnInit {
       });
 
     this.channelsSubject
-      .subscribe({next: incomingChannels => {
-        if(incomingChannels != null){
-        this.channels = [];
-        for(let chan of incomingChannels){
-          this.channels.push({checked: false, channel: chan});
-        }}
-      }});
+      .flatMap((channel, index) => channel )
+      .subscribe({
+        next: channel => {
+          this.channels.push({checked: false, channel: channel});
+        }
+      });
   }
 
   selectArchive(archiveID: number){
