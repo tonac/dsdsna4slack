@@ -32,18 +32,21 @@ class ArchiveSerializer(serializers.ModelSerializer):
 class SlackUserUploadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(max_length=10)
     is_bot = serializers.BooleanField()
+    real_name = serializers.CharField(required=False)
 
     class Meta:
         model = SlackUser
-        fields = ('id', 'team_id', 'name', 'is_bot')
+        fields = ('id', 'team_id', 'name', 'is_bot', 'real_name')
 
     def create(self, validated_data):
+        # TODO: replace [] with get()
         if not validated_data['is_bot']:
             return SlackUser.objects.create(
                 slack_id=validated_data['id'],
                 team_id=validated_data['team_id'],
                 name=validated_data['name'],
-                archive=validated_data['archive']
+                archive=validated_data['archive'],
+                real_name=validated_data['real_name']
             )
         return None
 
