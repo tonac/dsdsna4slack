@@ -15,8 +15,8 @@
     <div class="form-group" style="align-items:center">
       <div style="display:block">I want my graph to be:</div>
       <div tyle="display:block"> 
-          <select style="height:10%" class="selectpicker form-control" [(ngModel)]="selectedGraphType" name="selectOption" (ngModelChange)="selectGraphType($event)">
-              <option *ngFor="let graphType of graphTypes" value="{{graphType.id}}" [attr.selected]="graphType.id == 0 ? true : null"> 
+          <select style="height:10%" class="selectpicker form-control" [(ngModel)]="requestData.graph_type" name="selectOption">
+              <option *ngFor="let graphType of graphTypes" value="{{graphType.id}}" [attr.selected]="graphType.id == 'mention' ? true : null"> 
               {{graphType.name}} 
               </option>
           </select>

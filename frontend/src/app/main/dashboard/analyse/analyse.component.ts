@@ -5,7 +5,8 @@ import { Channel } from '../../../model/channel';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ArchiveService } from '../../../services/archive.service';
 import { AlertService } from '../../../services/alert.service';
-
+import { AnalysisRequest } from '../../../model/analysisRequest';
+import { ResultService } from '../../../services/result.service';
 
 @Component({
   selector: 'app-analyse',
@@ -13,6 +14,9 @@ import { AlertService } from '../../../services/alert.service';
   styleUrls: ['./analyse.component.css']
 })
 export class AnalyseComponent implements OnInit {
+  requestData: AnalysisRequest;
+
+
   loading: boolean;
 
   archives: Array<Archive>;
@@ -26,11 +30,14 @@ export class AnalyseComponent implements OnInit {
   channelsSubject: BehaviorSubject<Array<Channel>>;
   selectedArchiveSubject: BehaviorSubject<number>;
 
-  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
+  graphTypes: Array<any> = [{id:"mention", name:'mention based'}, {id:"subscription", name:'subscription based'}];
 
-  constructor(private archiveService: ArchiveService, private alertService: AlertService) { }
+  constructor(private resultService: ResultService, private archiveService: ArchiveService, private alertService: AlertService) { }
 
   ngOnInit() {
+    this.requestData = new AnalysisRequest();
+    this.requestData.graph_type = "mention";
+
     this.channelsForArchive[-1] = new Array<Channel>();
     this.selectedGraphType = 0;
     this.channelsSubject = new BehaviorSubject<Array<Channel>>([]);
@@ -56,6 +63,7 @@ export class AnalyseComponent implements OnInit {
     this.selectedArchiveSubject
       .subscribe({
         next: archiveId => {
+          this.requestData.archive = archiveId;
           this.channels = [];
           if(this.channelsForArchive[archiveId]) {
             this.channelsSubject.next(this.channelsForArchive[archiveId]); 
@@ -77,26 +85,50 @@ export class AnalyseComponent implements OnInit {
   }
 
   selectArchive(archiveID: number){
-    this.selectedArchive = archiveID;
     this.selectedArchiveSubject.next(archiveID);
   }
 
-  selectGraphType(graphType: number){
-    console.log("Graphtype selected " + graphType);
-    console.log(this.selectedGraphType);
-  }
+  // selectGraphType(graphType: number){
+  //   console.log("Graphtype selected " + graphType);
+  //   console.log(this.selectedGraphType);
+  // }
 
   checkboxSelected(aCheckbox: number){
     let allSelected = (document.getElementById('-1') as HTMLInputElement).checked;
+    let thisSelected: boolean = (document.getElementById(aCheckbox.toString()) as HTMLInputElement).checked;
+
+
     if (aCheckbox === -1){
+      this.requestData.channels = [];
       for(var channel of this.channels){
         (document.getElementById(channel.channel.id) as HTMLInputElement).checked = allSelected;
         channel.checked = allSelected;
       }
     }
+
+    this.requestData.channels = [];
+    for(var channel of this.channels) {
+      if((document.getElementById(channel.channel.id) as HTMLInputElement).checked) {
+        this.addChannelToRequestData(channel.channel.name);
+      }
+    }
+  }
+
+  addChannelToRequestData(channelName: string) {
+    if("all" != channelName.toLowerCase()) {
+      this.requestData.channels.push(channelName);
+    }
   }
 
   analyse() {
-    console.log('I\'m analisyng');
+    if(this.requestData.valid) {
+      this.resultService.getResultForRequest(this.requestData)
+      .subscribe({
+        next: result => console.log(result),
+        error: error => this.alertService.error('Not all fields are valid.')
+      })
+    } else {
+      this.alertService.error('Not all fields are valid.');
+    }
   }
 }
