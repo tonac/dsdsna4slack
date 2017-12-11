@@ -1,32 +1,31 @@
-from rest_framework import viewsets, permissions
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework import viewsets, permissions, status, response
 
 from analysis.models import OverallSubscription
 from analysis.permissions import HasMetricsPermission
 from analysis.serializers import MakeOverallSubscriptionSerializer, OverallSubscriptionSerializer
 from archive.models import Archive
-from archive.permissions import IsArchiveOwner
 
 
 class OverallSubscriptionViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticated, IsArchiveOwner, HasMetricsPermission)
-    parser_classes = (MultiPartParser, FormParser,)
-    http_method_names = ['get', 'post']
+    permission_classes = (permissions.IsAuthenticated, HasMetricsPermission)
+    http_method_names = ['get', 'head', 'delete', 'post']
 
     def get_queryset(self):
-        if self.action == 'list':
-            return OverallSubscription.objects.filter(archive__user_id=self.request.user)
+        if self.action in ['list', 'retrieve']:
+            return OverallSubscription.objects.filter(archive__user=self.request.user)
         elif self.action == 'create':
             return Archive.objects.filter(archive__user_id=self.request.user)
 
     def get_serializer_class(self):
         if self.action == 'create':
             return MakeOverallSubscriptionSerializer
-        elif self.action == 'list':
+        elif self.action in ['list', 'retrieve']:
             return OverallSubscriptionSerializer
 
-    # def create(self, request, *args, **kwargs):
-    # serializer = self.get_serializer(data=request.data)
-    # serializer.is_valid(raise_exception=True)
-    # archive = serializer.save(user=self.request.user)
-    # return response.Response(ArchiveSerializer(archive).data, status=status.HTTP_201_CREATED)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        archive = serializer.validated_data['archive']
+        channels = serializer.validated_data['channels']
+        serializer.save(archive, channels)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)

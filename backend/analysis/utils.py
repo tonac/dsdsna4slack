@@ -1,8 +1,8 @@
-from itertools import permutations
+from itertools import permutations, combinations
 
 import networkx as nx
 
-from archive.models import Mention, SlackUser, Channel
+from archive.models import Mention, SlackUser
 
 
 def create_mention_graph(archive, channels):
@@ -31,14 +31,27 @@ def create_subscription_graph(archive, channels):
     graph = nx.Graph()
 
     # Put all channels and users as nodes
-    graph.add_nodes_from(SlackUser.objects.filter(archive=archive), bipartite=0)
+    users = SlackUser.objects.filter(archive=archive)
+
+    graph.add_nodes_from(users, bipartite=0)
     graph.add_nodes_from(channels, bipartite=1)
 
+    channels_info = []
+    sent_messages_info = []
     for channel in channels:
+        channels_info.append({'id': channel.id, 'name': channel.name})
         for member in channel.members.all():
+            sent_messages = channel.messages.filter(slack_user=member).count()
             graph.add_edge(member, channel)
+            # graph.add_edge(member, channel, weight=sent_messages)
+            sent_messages_info.append({'channel_id': channel.id, 'user_id': member.id, 'messages': sent_messages})
 
-    return graph
+    dictionary_graph = {
+        'users': list(users.values('id', 'real_name')),
+        'channels': channels_info,
+        'sent_messages': sent_messages_info}
+
+    return graph, dictionary_graph
 
 
 def calculate_density(graph):
@@ -48,3 +61,40 @@ def calculate_density(graph):
         return nx.algorithms.bipartite.density(graph, user_nodes)
     else:
         return nx.density(graph)
+
+
+def calculate_average_path_length(graph):
+    if nx.is_bipartite(graph):
+        user_nodes = set(n for n, d in graph.nodes(data=True) if d['bipartite'] == 0)
+        sum_of_lengths = 0
+        for start, end in combinations(user_nodes, 2):
+            try:
+                sum_of_lengths += nx.shortest_path_length(graph, source=start, target=end)
+            except nx.exception.NetworkXNoPath:
+                return 0
+
+        return sum_of_lengths / ((len(user_nodes) * len(user_nodes) - 1) / 2)
+
+    else:
+        try:
+            return nx.average_shortest_path_length(graph)
+        except nx.exception.NetworkXNoPath:
+            return 0
+
+
+def calculate_edge_connectivity(graph):
+    if nx.is_bipartite(graph):
+        user_nodes = set(n for n, d in graph.nodes(data=True) if d['bipartite'] == 0)
+        return min([nx.edge_connectivity(graph, s=start, t=end) for start, end in combinations(user_nodes, 2)])
+
+    else:
+        return nx.edge_connectivity(graph)
+
+
+def calculate_node_connectivity(graph):
+    if nx.is_bipartite(graph):
+        user_nodes = set(n for n, d in graph.nodes(data=True) if d['bipartite'] == 0)
+        return min([nx.node_connectivity(graph, s=start, t=end) for start, end in combinations(user_nodes, 2)])
+
+    else:
+        return nx.node_connectivity(graph)
