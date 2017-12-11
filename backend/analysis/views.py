@@ -28,5 +28,5 @@ class OverallMetricsViewSet(viewsets.ModelViewSet):
         archive = serializer.validated_data['archive']
         channels = serializer.validated_data['channels']
         graph_type = serializer.validated_data['graph_type']
-        serializer.save(archive, channels, graph_type)
-        return response.Response(serializer.data, status=status.HTTP_200_OK)
+        analysis_result = serializer.save(archive, channels, graph_type)
+        return response.Response(analysis_result, status=status.HTTP_200_OK)
