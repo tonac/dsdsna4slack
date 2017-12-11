@@ -1,10 +1,27 @@
 import {Injectable} from '@angular/core';
+import {Http, Response} from '@angular/http';
+import {Observable} from 'rxjs/Observable';
+import {UserService} from './user.service';
 import {DataSet, Edge, IdType, Node} from 'vis';
+import { AnalysisRequest } from '../model/analysisRequest';
+import { AnalysisResult } from '../model/analysisResult';
 
 @Injectable()
 export class ResultService {
 
-  constructor() {
+  constructor(private http: Http, private userService: UserService) {
+  }
+
+  getResultForRequest(request: AnalysisRequest): Observable<any> {
+    return this.http.post(
+      '/api/analysis/v1/overall-metrics/',
+      request,
+      this.userService.jwt()
+    ).map((response: Response) => {
+      let archives = response.json();
+      console.log(archives["graph_type"]);
+      return archives;
+    });
   }
 
   getResults() {

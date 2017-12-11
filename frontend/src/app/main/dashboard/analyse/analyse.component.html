@@ -4,9 +4,10 @@
   <form name="form" (ngSubmit)="f.form.valid && analyse()" #f="ngForm" novalidate>
     
     <div class="form-group">
-        <select class="selectpicker form-control" [(ngModel)]="selectedArchive" name="selectOption" (ngModelChange)="selectArchive($event)">
-            <option *ngFor="let archive of archives | async" value="{{archive.id}}" [attr.selected]="archive.id == 0 ? true : null"> 
-            {{archive.name}} 
+        <select class="selectpicker form-control" name="selectOption" (change)="selectArchive($event.target.value)">
+          <option selected disabled>Select your archive</option>
+            <option *ngFor="let archive of archives" [value]="archive.id" > 
+              {{archive.name}} 
             </option>
         </select>
     </div>
@@ -14,17 +15,17 @@
     <div class="form-group" style="align-items:center">
       <div style="display:block">I want my graph to be:</div>
       <div tyle="display:block"> 
-          <select style="height:10%" class="selectpicker form-control" [(ngModel)]="selectedGraphType" name="selectOption" (ngModelChange)="selectGraphType($event)">
-              <option *ngFor="let graphType of graphTypes" value="{{graphType.id}}" [attr.selected]="graphType.id == 0 ? true : null"> 
+          <select style="height:10%" class="selectpicker form-control" [(ngModel)]="requestData.graph_type" name="selectOption">
+              <option *ngFor="let graphType of graphTypes" value="{{graphType.id}}" [attr.selected]="graphType.id == 'mention' ? true : null"> 
               {{graphType.name}} 
               </option>
           </select>
       </div>
     </div>
 
-    <div class="form-group" style="align-items:center">
-        <div>and include these channels</div>
-        <div class="container">
+    <div class="form-group">
+        <div>and include these channels:</div>
+        <div style="margin-left:5%">
             <ng-container  *ngFor="let channel of channels">
                 <input [(id)]="channel.channel.id" type="checkbox" ngControl='channel' [(ngModel)]="channel.checked" name="tmp" (click)="checkboxSelected(channel.channel.id)"/>
                 <label>{{channel.channel.name}}</label>
