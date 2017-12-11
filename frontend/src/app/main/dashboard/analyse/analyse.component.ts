@@ -3,6 +3,10 @@ import { Observable } from 'rxjs/Observable';
 import { Archive } from '../../../model/archive';
 import { Channel } from '../../../model/channel';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ArchiveService } from '../../../services/archive.service';
+import { AlertService } from '../../../services/alert.service';
+import { AnalysisRequest } from '../../../model/analysisRequest';
+import { ResultService } from '../../../services/result.service';
 
 @Component({
   selector: 'app-analyse',
@@ -10,88 +14,121 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
   styleUrls: ['./analyse.component.css']
 })
 export class AnalyseComponent implements OnInit {
+  requestData: AnalysisRequest;
+
+
   loading: boolean;
-  archives: Observable<Array<Archive>>;
 
-  archivesArray: Array<Archive>;
-  archivesSubject: BehaviorSubject<Array<Archive>>;
-
-  channelsArray: Array<Channel>;
-  channelsSubject: BehaviorSubject<Array<Channel>>;
-
-  selectedArchive: number;
-  selectedGraphType: number;
-
-  graphTypes: Array<any> = [{id:0, name:'mention based'}, {id:1, name:'subscription based'}];
-
+  archives: Array<Archive>;
   channels: Array<any>;
 
-  constructor() { }
+  selectedGraphType: number;
+  selectedArchive: number;
+
+  channelsForArchive: { [archiveId: number] : Channel[]; } = {};
+
+  channelsSubject: BehaviorSubject<Array<Channel>>;
+  selectedArchiveSubject: BehaviorSubject<number>;
+
+  graphTypes: Array<any> = [{id:"mention", name:'mention based'}, {id:"subscription", name:'subscription based'}];
+
+  constructor(private resultService: ResultService, private archiveService: ArchiveService, private alertService: AlertService) { }
 
   ngOnInit() {
-    var tmpArchive: Archive = new Archive();
-    tmpArchive.id = 0;
-    tmpArchive.name = 'Select your archive';
+    this.requestData = new AnalysisRequest();
+    this.requestData.graph_type = "mention";
 
-    var tmpArchive2: Archive = new Archive();
-    tmpArchive2.id = 1;
-    tmpArchive2.name = 'DSD-sna4slack2';
-    tmpArchive2.uploaded = new Date(2017, 11, 10, 0,0,0,0).toDateString();
-
-    this.archivesArray = [tmpArchive, tmpArchive2];
-    this.archivesSubject = new BehaviorSubject<Array<Archive>>(this.archivesArray);
-    this.archives = this.archivesSubject.asObservable();
-
-    this.selectedArchive = -1;
+    this.channelsForArchive[-1] = new Array<Channel>();
     this.selectedGraphType = 0;
-
     this.channelsSubject = new BehaviorSubject<Array<Channel>>([]);
+    this.selectedArchiveSubject = new BehaviorSubject<number>(null);
 
-    this.channelsSubject.subscribe({next: incomingChannels => {
-      this.channels = [];
-      for(let chan of incomingChannels){
-        this.channels.push({checked: false, channel: chan});
-        console.log(chan.id);
-      }
-    }});
+    this.archives = new Array<Archive>();
 
+    this.archiveService.getAllForUser()
+      .flatMap((archive, index) => archive)
+      .subscribe({
+        next:
+          archive => {
+            this.archives.push(archive);
+            this.channelsForArchive[archive.id] = 
+              [new Channel(-1, 'ALL')].concat(archive.channels);
+          },
+        error: error => {
+          this.alertService.error('Error while fetching archives: ' + error);
+        }
+      });
 
-  }
+    
+    this.selectedArchiveSubject
+      .subscribe({
+        next: archiveId => {
+          this.requestData.archive = archiveId;
+          this.channels = [];
+          if(this.channelsForArchive[archiveId]) {
+            this.channelsSubject.next(this.channelsForArchive[archiveId]); 
+            console.log("archive selected" + archiveId);
+          }
+        },
+        error: error => {
+          this.alertService.error('Error when selecting archive: ' + error);
+        }
+      });
 
-  addChannels() {
-    this.channelsSubject.next([
-      new Channel(0, 'all'),
-      new Channel(1, '#general'),
-      new Channel(2, '#random')
-    ]);
-  }
-
-  removeChannels() {
-    this.channelsSubject.next([]);
+    this.channelsSubject
+      .flatMap((channel, index) => channel )
+      .subscribe({
+        next: channel => {
+          this.channels.push({checked: false, channel: channel});
+        }
+      });
   }
 
   selectArchive(archiveID: number){
-    if(archiveID === 0){
-      this.removeChannels();
-    } else {
-      this.addChannels();
-    }
+    this.selectedArchiveSubject.next(archiveID);
   }
 
-  selectGraphType(graphType: number){
-  }
+  // selectGraphType(graphType: number){
+  //   console.log("Graphtype selected " + graphType);
+  //   console.log(this.selectedGraphType);
+  // }
 
   checkboxSelected(aCheckbox: number){
-    let allSelected = (document.getElementById('0') as HTMLInputElement).checked;
-    if (aCheckbox === 0){
+    let allSelected = (document.getElementById('-1') as HTMLInputElement).checked;
+    let thisSelected: boolean = (document.getElementById(aCheckbox.toString()) as HTMLInputElement).checked;
+
+
+    if (aCheckbox === -1){
+      this.requestData.channels = [];
       for(var channel of this.channels){
         (document.getElementById(channel.channel.id) as HTMLInputElement).checked = allSelected;
         channel.checked = allSelected;
       }
     }
+
+    this.requestData.channels = [];
+    for(var channel of this.channels) {
+      if((document.getElementById(channel.channel.id) as HTMLInputElement).checked) {
+        this.addChannelToRequestData(channel.channel.name);
+      }
+    }
+  }
+
+  addChannelToRequestData(channelName: string) {
+    if("all" != channelName.toLowerCase()) {
+      this.requestData.channels.push(channelName);
+    }
   }
 
   analyse() {
-    console.log('I\'m analisyng');
+    if(this.requestData.valid) {
+      this.resultService.getResultForRequest(this.requestData)
+      .subscribe({
+        next: result => console.log(result),
+        error: error => this.alertService.error('Not all fields are valid.')
+      })
+    } else {
+      this.alertService.error('Not all fields are valid.');
+    }
   }
 }
