@@ -7,9 +7,18 @@ from archive.serializers import Archive, Channel
 
 
 class OverallMetricsSerializer(serializers.ModelSerializer):
+    archive_name = serializers.SerializerMethodField()
+    analysed_channels_names = serializers.SerializerMethodField()
+
     class Meta:
         model = OverallMetrics
         exclude = ('analysed_channels',)
+
+    def get_archive_name(self, obj):
+        return obj.archive.name
+
+    def get_analysed_channels_names(self, obj):
+        return Channel.objects.filter(id__in=obj.analysed_channels).values('name')
 
 
 class ChannelField(serializers.SlugRelatedField):
