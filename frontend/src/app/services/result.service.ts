@@ -12,15 +12,31 @@ export class ResultService {
   constructor(private http: Http, private userService: UserService) {
   }
 
-  getResultForRequest(request: AnalysisRequest): Observable<any> {
+  getResultForRequest(request: AnalysisRequest): Observable<AnalysisResult> {
     return this.http.post(
       '/api/analysis/v1/overall-metrics/',
       request,
       this.userService.jwt()
     ).map((response: Response) => {
-      let archives = response.json();
-      console.log(archives["graph_type"]);
-      return archives;
+      return response.json() as AnalysisResult;
+    });
+  }
+
+  getResultsForId(id: number): Observable<any> {
+    return this.http.get(
+      '/api/analysis/v1/overall-metrics/' + id,
+      this.userService.jwt()
+    ).map((response: Response) => {
+      return response.json() as AnalysisResult;
+    });
+  }
+
+  getResultsForUser(): Observable<Array<AnalysisResult>> {
+    return this.http.get(
+      '/api/analysis/v1/overall-metrics/',
+      this.userService.jwt()
+    ).map((response: Response) => {
+      return response.json() as AnalysisResult[];
     });
   }
 

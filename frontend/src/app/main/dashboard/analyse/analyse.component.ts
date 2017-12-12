@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { Archive } from '../../../model/archive';
 import { Channel } from '../../../model/channel';
@@ -7,6 +8,7 @@ import { ArchiveService } from '../../../services/archive.service';
 import { AlertService } from '../../../services/alert.service';
 import { AnalysisRequest } from '../../../model/analysisRequest';
 import { ResultService } from '../../../services/result.service';
+import { Data } from '../../../model/data';
 
 @Component({
   selector: 'app-analyse',
@@ -32,7 +34,7 @@ export class AnalyseComponent implements OnInit {
 
   graphTypes: Array<any> = [{id:"mention", name:'mention based'}, {id:"subscription", name:'subscription based'}];
 
-  constructor(private resultService: ResultService, private archiveService: ArchiveService, private alertService: AlertService) { }
+  constructor(private data: Data, private resultService: ResultService, private archiveService: ArchiveService, private alertService: AlertService, private router: Router) { }
 
   ngOnInit() {
     this.requestData = new AnalysisRequest();
@@ -121,11 +123,20 @@ export class AnalyseComponent implements OnInit {
   }
 
   analyse() {
-    if(this.requestData.valid) {
+
+    
+
+    if(this.requestData.valid()) {
       this.resultService.getResultForRequest(this.requestData)
       .subscribe({
-        next: result => console.log(result),
-        error: error => this.alertService.error('Not all fields are valid.')
+        next: result => {
+          this.data.storage = {
+            "resultsId": result.id
+          }
+          console.log(result);
+          this.router.navigate(['/dashboard/results']);
+        },
+          error: error => this.alertService.error('There was an error processing this request.')
       })
     } else {
       this.alertService.error('Not all fields are valid.');
