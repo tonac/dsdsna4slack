@@ -53,7 +53,7 @@ export class AnalyseComponent implements OnInit {
         next:
           archive => {
             this.archives.push(archive);
-            this.channelsForArchive[archive.id] = 
+            this.channelsForArchive[archive.id] =
               [new Channel(-1, 'ALL')].concat(archive.channels);
           },
         error: error => {
@@ -61,14 +61,14 @@ export class AnalyseComponent implements OnInit {
         }
       });
 
-    
+
     this.selectedArchiveSubject
       .subscribe({
         next: archiveId => {
           this.requestData.archive = archiveId;
           this.channels = [];
           if(this.channelsForArchive[archiveId]) {
-            this.channelsSubject.next(this.channelsForArchive[archiveId]); 
+            this.channelsSubject.next(this.channelsForArchive[archiveId]);
             console.log("archive selected" + archiveId);
           }
         },
@@ -111,20 +111,21 @@ export class AnalyseComponent implements OnInit {
     this.requestData.channels = [];
     for(var channel of this.channels) {
       if((document.getElementById(channel.channel.id) as HTMLInputElement).checked) {
-        this.addChannelToRequestData(channel.channel.name);
+        this.addChannelToRequestData(channel.channel.id);
       }
     }
   }
 
-  addChannelToRequestData(channelName: string) {
-    if("all" != channelName.toLowerCase()) {
-      this.requestData.channels.push(channelName);
+  addChannelToRequestData(channelId: number) {
+    // if("all" != channelId.toLowerCase()) {
+    if(channelId !== -1) {
+      this.requestData.channels.push(channelId);
     }
   }
 
   analyse() {
 
-    
+
 
     if(this.requestData.valid()) {
       this.resultService.getResultForRequest(this.requestData)

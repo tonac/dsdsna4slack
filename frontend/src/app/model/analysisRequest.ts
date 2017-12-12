@@ -1,6 +1,6 @@
 export class AnalysisRequest {
     archive: number;
-    channels: string[];
+    channels: number[];
     graph_type: string;
 
     valid(): boolean {

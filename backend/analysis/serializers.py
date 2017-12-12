@@ -29,7 +29,7 @@ class ChannelField(serializers.SlugRelatedField):
 
 
 class MakeOverallMetricsSerializer(serializers.ModelSerializer):
-    channels = ChannelField(many=True, slug_field='name')
+    channels = ChannelField(many=True, slug_field='id')
 
     def validate(self, data):
 
@@ -66,15 +66,17 @@ class MakeOverallMetricsSerializer(serializers.ModelSerializer):
 
         if graph_type == 'subscription':
             graph, dict_graph = create_subscription_graph(archive, channels)
-        else:
+        elif graph_type == 'mention':
             graph, dict_graph = create_mention_graph(archive, channels)
+        else:
+            return None
 
         overall_subscription = OverallMetrics.objects.create(
             archive=archive,
-            density=calculate_density(graph),
-            path_length=calculate_average_path_length(graph),
-            node_connectivity=calculate_node_connectivity(graph),
-            edge_connectivity=calculate_edge_connectivity(graph),
+            density=calculate_density(graph, graph_type),
+            path_length=calculate_average_path_length(graph, graph_type),
+            node_connectivity=calculate_node_connectivity(graph, graph_type),
+            edge_connectivity=calculate_edge_connectivity(graph, graph_type),
             json_graph=dict_graph,
             graph_type=graph_type,
             analysed_channels=channels_id
