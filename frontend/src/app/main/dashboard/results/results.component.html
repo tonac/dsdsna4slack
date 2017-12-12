@@ -7,14 +7,14 @@
       </div>
     </div>
   </div>
-  
+
   <div *ngIf="graphVisualization">
   <div style="width:100%; text-align:center;">
       <div class="container-fluid">
           <div class="row">
             <div class="col-md-10" style="display: flex; align-items: center;">
               <h1 style="line-height:inherit;justify-content:center">
-                Archive names goes here.
+                {{selectedResult.archive_name}}
               </h1>
             </div>
             <div class="col-md-2" style="display: flex; align-items:right;">
@@ -25,13 +25,16 @@
           </div>
           <p style="text-align:left">
             Graph is {{selectedResult.graph_type}} based from these channels:
+            <span *ngFor="let channel of selectedResult.analysed_channels_names; let i = index">
+              {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+            </span>
           </p>
         </div>
         <div id="my_network" class="row" style="display:inline-block;" ></div>
   </div>
     <br>
-  
-    
+
+
     <div style="display: flex; align-items: left;">
       Density: {{selectedResult.density}}
       <br>
@@ -41,14 +44,17 @@
       <br>
       Node connectivity: {{selectedResult.node_connectivity}}
     </div>
-    
+
   </div>
-  
+
   <div *ngIf="!graphVisualization">
     <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
       <div class="col-md-5">
-        <h3>Archive name goes here.</h3>
+        <h3>{{result.archive_name}}</h3>
         Graph is {{result.graph_type}} based from these channels:
+        <span *ngFor="let channel of result.analysed_channels_names; let i = index">
+              {{channel.name + (result.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+        </span>
       </div>
       <div class="col-md-4">
         <div [id]="getResultId(i)"></div>
@@ -59,4 +65,3 @@
       <app-network-vis [network]="result.graph" [networkIndex]="i"></app-network-vis>
     </div>
   </div>
-  

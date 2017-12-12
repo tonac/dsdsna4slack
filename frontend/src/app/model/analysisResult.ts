@@ -1,5 +1,3 @@
-import { Graph } from './graph';
-
 export class AnalysisResult {
     id: number;
     public: boolean;
@@ -11,4 +9,6 @@ export class AnalysisResult {
     graph_type: string;
     archive: number;
     graph: any;
+    archive_name: string;
+    analysed_channels_names: Array<any>;
 }
