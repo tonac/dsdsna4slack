@@ -1,6 +1,7 @@
 from itertools import permutations, combinations
 
 import networkx as nx
+from django.db.models import Sum
 
 from archive.models import Mention, SlackUser
 
@@ -21,12 +22,12 @@ def create_mention_graph(archive, channels):
             mention_sender=sender,
             mention_receiver=receiver,
             mention_channel__in=channels
-        ).count()
+        ).aggregate(Sum('number_of_mentions'))['number_of_mentions__sum']
 
         # If there is some mentions between users create edge
-        if number_of_mentions > 0:
+        if number_of_mentions:
             graph.add_edge(sender, receiver, weight=number_of_mentions)
-            mentions.append((sender.id, receiver.id, number_of_mentions))
+            mentions.append({'sender_id': sender.id, 'receiver_id': receiver.id, 'mentions': number_of_mentions})
 
     dictionary_graph = {
         'users': list(users.values('id', 'real_name')),
@@ -63,17 +64,17 @@ def create_subscription_graph(archive, channels):
     return graph, dictionary_graph
 
 
-def calculate_density(graph):
-    if nx.is_bipartite(graph):
+def calculate_density(graph, graph_type):
+    if graph_type == 'subscription':
         user_nodes = set(n for n, d in graph.nodes(data=True) if d.get('bipartite') == 0)
         # In our graphs it is the same if we calculate density on user or channel nodes because they are symmetric
         return nx.algorithms.bipartite.density(graph, user_nodes)
-    else:
+    elif graph_type == 'mention':
         return nx.density(graph)
 
 
-def calculate_average_path_length(graph):
-    if nx.is_bipartite(graph):
+def calculate_average_path_length(graph, graph_type):
+    if graph_type == 'subscription':
         user_nodes = set(n for n, d in graph.nodes(data=True) if d.get('bipartite') == 0)
         sum_of_lengths = 0
         for start, end in combinations(user_nodes, 2):
@@ -84,28 +85,28 @@ def calculate_average_path_length(graph):
 
         return sum_of_lengths / ((len(user_nodes) * len(user_nodes) - 1) / 2)
 
-    else:
+    elif graph_type == 'mention':
         try:
             return nx.average_shortest_path_length(graph)
         except (nx.exception.NetworkXNoPath, nx.exception.NetworkXError):
             return 0
 
 
-def calculate_edge_connectivity(graph):
-    if nx.is_bipartite(graph):
+def calculate_edge_connectivity(graph, graph_type):
+    if graph_type == 'subscription':
         user_nodes = set(n for n, d in graph.nodes(data=True) if d.get('bipartite') == 0)
         results = [nx.edge_connectivity(graph, s=start, t=end) for start, end in combinations(user_nodes, 2)]
         return min(results) if results else 0
 
-    else:
+    elif graph_type == 'mention':
         return nx.edge_connectivity(graph)
 
 
-def calculate_node_connectivity(graph):
-    if nx.is_bipartite(graph):
+def calculate_node_connectivity(graph, graph_type):
+    if graph_type == 'subscription':
         user_nodes = set(n for n, d in graph.nodes(data=True) if d.get('bipartite') == 0)
         results = [nx.node_connectivity(graph, s=start, t=end) for start, end in combinations(user_nodes, 2)]
         return min(results) if results else 0
 
-    else:
+    elif graph_type == 'mention':
         return nx.node_connectivity(graph)

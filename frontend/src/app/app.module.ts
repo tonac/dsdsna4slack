@@ -21,6 +21,8 @@ import {ArchiveService} from './services/archive.service';
 import {ResultService} from './services/result.service';
 import { NetworkVisComponent } from './main/dashboard/results/network-vis/network-vis.component';
 import { SpinnerModule } from '@chevtek/angular-spinners';
+import { Data } from './model/data';
+
 
 let homeState = {name: 'home', url: '/', component: HomeComponent};
 let registerState = {name: 'register', url: '/register', component: RegisterComponent};
@@ -53,7 +55,7 @@ let registerState = {name: 'register', url: '/register', component: RegisterComp
     UserService,
     ArchiveService,
     ResultService,
-
+    Data,
     BaseRequestOptions
   ],
   bootstrap: [AppComponent]

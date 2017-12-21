@@ -7,9 +7,18 @@ from archive.serializers import Archive, Channel
 
 
 class OverallMetricsSerializer(serializers.ModelSerializer):
+    archive_name = serializers.SerializerMethodField()
+    analysed_channels_names = serializers.SerializerMethodField()
+
     class Meta:
         model = OverallMetrics
         exclude = ('analysed_channels',)
+
+    def get_archive_name(self, obj):
+        return obj.archive.name
+
+    def get_analysed_channels_names(self, obj):
+        return Channel.objects.filter(id__in=obj.analysed_channels).values('name')
 
 
 class ChannelField(serializers.SlugRelatedField):
@@ -20,7 +29,7 @@ class ChannelField(serializers.SlugRelatedField):
 
 
 class MakeOverallMetricsSerializer(serializers.ModelSerializer):
-    channels = ChannelField(many=True, slug_field='name')
+    channels = ChannelField(many=True, slug_field='id')
 
     def validate(self, data):
 
@@ -57,15 +66,17 @@ class MakeOverallMetricsSerializer(serializers.ModelSerializer):
 
         if graph_type == 'subscription':
             graph, dict_graph = create_subscription_graph(archive, channels)
-        else:
+        elif graph_type == 'mention':
             graph, dict_graph = create_mention_graph(archive, channels)
+        else:
+            return None
 
         overall_subscription = OverallMetrics.objects.create(
             archive=archive,
-            density=calculate_density(graph),
-            path_length=calculate_average_path_length(graph),
-            node_connectivity=calculate_node_connectivity(graph),
-            edge_connectivity=calculate_edge_connectivity(graph),
+            density=calculate_density(graph, graph_type),
+            path_length=calculate_average_path_length(graph, graph_type),
+            node_connectivity=calculate_node_connectivity(graph, graph_type),
+            edge_connectivity=calculate_edge_connectivity(graph, graph_type),
             json_graph=dict_graph,
             graph_type=graph_type,
             analysed_channels=channels_id
