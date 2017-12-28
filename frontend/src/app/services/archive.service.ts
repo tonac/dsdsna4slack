@@ -41,4 +41,11 @@ export class ArchiveService {
     //   })
   }
 
+  delete(id): Observable<Boolean> {
+    let url: string = '/api/archive/v1/archive/' + id 
+    return this.http.delete(url, this.userService.jwt()).map((response: Response) => {
+      return response.json() == undefined;
+    })
+  }
+
 }
