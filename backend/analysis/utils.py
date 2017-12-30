@@ -83,7 +83,7 @@ def calculate_average_path_length(graph, graph_type):
             except (nx.exception.NetworkXNoPath, nx.exception.NetworkXError):
                 return 0
 
-        return sum_of_lengths / ((len(user_nodes) * len(user_nodes) - 1) / 2)
+        return sum_of_lengths / ((len(user_nodes) * (len(user_nodes) - 1)) / 2)
 
     elif graph_type == 'mention':
         try:

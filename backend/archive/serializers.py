@@ -5,6 +5,8 @@ import zipfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 
 from archive.models import Archive, SlackUser, Channel, Message, Mention
 
@@ -185,8 +187,12 @@ class FileUploadSerializer(serializers.Serializer):
     def save(self, user):
         with zipfile.ZipFile(self.validated_data['datafile']) as archive_zip_file:
             archive = self.save_archive(archive_zip_file, user)
-            users = self.save_users(archive_zip_file, archive)
-            channels = self.save_channels(archive_zip_file, archive)
-            self.save_messages(archive_zip_file, archive, channels, users)
+            try:
+                users = self.save_users(archive_zip_file, archive)
+                channels = self.save_channels(archive_zip_file, archive)
+                self.save_messages(archive_zip_file, archive, channels, users)
+            except:
+                archive.delete()
+                raise serializers.ValidationError('Zip archive is corrupted. Try with original version.')
 
         return archive

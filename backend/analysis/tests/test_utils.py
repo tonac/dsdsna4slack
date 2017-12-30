@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils.timezone import now
 
 from analysis.utils import create_mention_graph, calculate_node_connectivity, calculate_edge_connectivity, \
-    calculate_average_path_length, calculate_density
+    calculate_average_path_length, calculate_density, create_subscription_graph
 from archive.models import Archive, Channel, Mention, Message, SlackUser
 
 
@@ -19,6 +19,10 @@ class GraphAnalysisTest(TestCase):
     no_members_messages = None
     no_members_no_messages = None
     broken_phone = None
+    chain_channel_a = None
+    chain_channel_b = None
+    chain_channel_c = None
+    chain_channel_d = None
     users = []
 
     @classmethod
@@ -47,6 +51,10 @@ class GraphAnalysisTest(TestCase):
         cls.no_members_messages = Channel.objects.create(name='no_members_messages', archive=cls.archive)
         cls.no_members_no_messages = Channel.objects.create(name='no_members_no_messages', archive=cls.archive)
         cls.broken_phone = Channel.objects.create(name='broken_phone', archive=cls.archive)
+        cls.chain_channel_a = Channel.objects.create(name='chain_channel_a', archive=cls.archive)
+        cls.chain_channel_b = Channel.objects.create(name='chain_channel_b', archive=cls.archive)
+        cls.chain_channel_c = Channel.objects.create(name='chain_channel_c', archive=cls.archive)
+        cls.chain_channel_d = Channel.objects.create(name='chain_channel_d', archive=cls.archive)
 
     @classmethod
     def add_users_to_channels(cls, howard, leonard, raj, sheldon):
@@ -57,6 +65,10 @@ class GraphAnalysisTest(TestCase):
         cls.shelly.members.add(sheldon)
         cls.no_message_members.members.add(sheldon, raj)
         cls.broken_phone.members.add(howard, leonard, raj, sheldon)
+        cls.chain_channel_a.members.add(howard, leonard)
+        cls.chain_channel_b.members.add(leonard, raj)
+        cls.chain_channel_c.members.add(raj, sheldon)
+        cls.chain_channel_d.members.add(sheldon, howard)
 
     @classmethod
     def create_messages_in_channel(cls, archive, channel, user):
@@ -199,7 +211,8 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(self.archive, archives[0]), 'Should be just one archive'
 
         all_channels = [self.home, self.no_members_messages, self.no_members_no_messages, self.no_message_members,
-                        self.secret, self.shelly, self.work, self.work_single_direction, self.broken_phone]
+                        self.secret, self.shelly, self.work, self.work_single_direction, self.broken_phone,
+                        self.chain_channel_a, self.chain_channel_b, self.chain_channel_c, self.chain_channel_d]
         self.assertQuerysetEqual(Channel.objects.all(), map(repr, all_channels), ordered=False, msg='Channels missing')
 
         self.assertEqual(SlackUser.objects.count(), 4, 'There should be 4 slack users')
@@ -387,3 +400,158 @@ class GraphAnalysisTest(TestCase):
         ]
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
+
+    def test_subscription_graph_no_subscriptions(self):
+        """Tests subscription graph when in selected channels there are no users subscribed to them."""
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive,
+                                                      [self.no_members_messages, self.no_members_no_messages])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 0, 'No connection should yield 0')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        self.assertEqual(graph_dict['sent_messages'], [], 'There should empty list, no users are subscribed')
+
+    def test_subscription_graph_one_subscriber(self):
+        """Tests subscription graph when in selected channel there is just one user subscribed to it."""
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive, [self.shelly])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 1 / 4, 'Just 1 of 4 possible connections')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        sent_messages = [{'messages': 100, 'user_id': 4, 'channel_id': self.shelly.id}]
+        self.assertEqual(graph_dict['sent_messages'], sent_messages, 'There should just messages from one user')
+
+    def test_subscription_graph_one_not_subscribed(self):
+        """
+        Tests subscription graph when in selected channel there is just one user not subscribed to it.
+        Testing also what happen when user is subscribed and she didn't send any messages.
+        """
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive, [self.secret])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 3 / 4, 'Just 3 of 4 possible connections')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        sent_messages = [
+            {'messages': 100, 'user_id': 1, 'channel_id': self.secret.id},
+            {'messages': 100, 'user_id': 2, 'channel_id': self.secret.id},
+            {'messages': 0, 'user_id': 3, 'channel_id': self.secret.id},
+        ]
+        self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
+                         'Check sorting first if lists length is the same')
+
+    def test_subscription_graph_all_subscribed_one_channel(self):
+        """Tests subscription graph when in selected channel all users are subscribed to it."""
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive, [self.work])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 2, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 1, 'All users should be subscribed to channel')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        sent_messages = [
+            {'messages': 100, 'user_id': 1, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 2, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 3, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 4, 'channel_id': self.work.id},
+        ]
+        self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
+                         'Check sorting first if lists length is the same')
+
+    def test_subscription_graph_chain(self):
+        """
+        Tests subscription graph when in selected channels users are connected in open chain.
+        Howard-A-Leonard-B-Raj-C-Sheldon
+        """
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive, [self.chain_channel_a, self.chain_channel_b,
+                                                                     self.chain_channel_c])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 20 / 6,
+                         'Combination of all users pairs path length, (2+4+6+2+4+2)/6')
+        self.assertEqual(calculate_density(graph, graph_type), 6 / 12, 'On each of 3 channels, 2 of possible 4 users')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        sent_messages = [
+            {'messages': 0, 'user_id': 1, 'channel_id': self.chain_channel_a.id},
+            {'messages': 0, 'user_id': 2, 'channel_id': self.chain_channel_a.id},
+            {'messages': 0, 'user_id': 2, 'channel_id': self.chain_channel_b.id},
+            {'messages': 0, 'user_id': 3, 'channel_id': self.chain_channel_b.id},
+            {'messages': 0, 'user_id': 3, 'channel_id': self.chain_channel_c.id},
+            {'messages': 0, 'user_id': 4, 'channel_id': self.chain_channel_c.id},
+        ]
+        self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
+                         'Check sorting first if lists length is the same')
+
+    def test_subscription_graph_circle(self):
+        """
+        Tests subscription graph when in selected channels users are connected in circle.
+        Howard-A-Leonard-B-Raj-C-Sheldon-D-Howard
+        """
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive, [self.chain_channel_a, self.chain_channel_b,
+                                                                     self.chain_channel_c, self.chain_channel_d])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 16 / 6,
+                         'Combination of all users pairs path length, (2+2+4+2+4+2)/6')
+        self.assertEqual(calculate_density(graph, graph_type), 8 / 16, 'On each of 4 channels, 2 of possible 4 users')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        sent_messages = [
+            {'messages': 0, 'user_id': 1, 'channel_id': self.chain_channel_a.id},
+            {'messages': 0, 'user_id': 1, 'channel_id': self.chain_channel_d.id},
+            {'messages': 0, 'user_id': 2, 'channel_id': self.chain_channel_a.id},
+            {'messages': 0, 'user_id': 2, 'channel_id': self.chain_channel_b.id},
+            {'messages': 0, 'user_id': 3, 'channel_id': self.chain_channel_b.id},
+            {'messages': 0, 'user_id': 3, 'channel_id': self.chain_channel_c.id},
+            {'messages': 0, 'user_id': 4, 'channel_id': self.chain_channel_c.id},
+            {'messages': 0, 'user_id': 4, 'channel_id': self.chain_channel_d.id},
+        ]
+        self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
+                         'Check sorting first if lists length is the same')
+
+    def test_subscription_graph_fully_connected(self):
+        """Tests subscription graph when in selected channels all users are subscribed to all channels."""
+        graph_type = 'subscription'
+        graph, graph_dict = create_subscription_graph(self.archive,
+                                                      [self.work, self.work_single_direction, self.broken_phone])
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 2, 'All users are on the same channels')
+        self.assertEqual(calculate_density(graph, graph_type), 1, 'All users are on the same channels')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+
+        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        sent_messages = [
+            {'messages': 100, 'user_id': 1, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 1, 'channel_id': self.work_single_direction.id},
+            {'messages': 100, 'user_id': 1, 'channel_id': self.broken_phone.id},
+            {'messages': 100, 'user_id': 2, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 2, 'channel_id': self.work_single_direction.id},
+            {'messages': 100, 'user_id': 2, 'channel_id': self.broken_phone.id},
+            {'messages': 100, 'user_id': 3, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 3, 'channel_id': self.work_single_direction.id},
+            {'messages': 100, 'user_id': 3, 'channel_id': self.broken_phone.id},
+            {'messages': 100, 'user_id': 4, 'channel_id': self.work.id},
+            {'messages': 100, 'user_id': 4, 'channel_id': self.work_single_direction.id},
+            {'messages': 0, 'user_id': 4, 'channel_id': self.broken_phone.id},
+        ]
+        self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
+                         'Check sorting first if lists length is the same')
