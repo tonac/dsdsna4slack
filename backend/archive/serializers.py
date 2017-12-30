@@ -5,8 +5,6 @@ import zipfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
 
 from archive.models import Archive, SlackUser, Channel, Message, Mention
 
