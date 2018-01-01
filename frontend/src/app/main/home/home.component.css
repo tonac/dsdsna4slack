@@ -56,8 +56,7 @@
 }
 
 .feature_img {
-  width: 320pt;
-  height: 180pt;
+  width: 100%;
   display: flex; 
   align-items: center;
 }
