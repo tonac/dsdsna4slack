@@ -1,67 +1,112 @@
 <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-10" style="display: flex; align-items: center;">
-        <h1 style="line-height:inherit;justify-content:center">
-          Results
-        </h1>
-      </div>
+  <div class="row">
+    <div class="col-md-10" style="display: flex; align-items: center;">
+      <h1 style="line-height:inherit;justify-content:center">
+        Results
+      </h1>
     </div>
   </div>
+</div>
 
-  <div *ngIf="graphVisualization">
+<div *ngIf="graphVisualization">
   <div style="width:100%; text-align:center;">
-      <div class="container-fluid">
-          <div class="row">
-            <div class="col-md-10" style="display: flex; align-items: center;">
-              <h1 style="line-height:inherit;justify-content:center">
-                {{selectedResult.archive_name}}
-              </h1>
-            </div>
-            <div class="col-md-2" style="display: flex; align-items:right;">
-                <div class="row" style="padding-top: 20px">
-                    <button class="btn btn-default btn-primary" (click)="goBackToResults()">Return to results list</button>
-                  </div>
-            </div>
-          </div>
-          <p style="text-align:left">
-            Graph is {{selectedResult.graph_type}} based from these channels:
-            <span *ngFor="let channel of selectedResult.analysed_channels_names; let i = index">
-              {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
-            </span>
-          </p>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-10" style="display: flex; align-items: center;">
+          <h1 style="line-height:inherit;justify-content:center">
+            {{selectedResult.archive_name}}
+          </h1>
         </div>
-        <div id="my_network" class="row" style="display:inline-block;" ></div>
-  </div>
-    <br>
-
-
-    <div style="display: flex; align-items: left;">
-      Density: {{selectedResult.density}}
-      <br>
-      Path length: {{selectedResult.path_length}}
-      <br>
-      Edge connectivity: {{selectedResult.edge_connectivity}}
-      <br>
-      Node connectivity: {{selectedResult.node_connectivity}}
-    </div>
-
-  </div>
-
-  <div *ngIf="!graphVisualization">
-    <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
-      <div class="col-md-5">
-        <h3>{{result.archive_name}}</h3>
-        Graph is {{result.graph_type}} based from these channels:
-        <span *ngFor="let channel of result.analysed_channels_names; let i = index">
-              {{channel.name + (result.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+        <div class="col-md-2" style="display: flex; align-items:right;">
+          <div class="row" style="padding-top: 20px">
+            <button class="btn btn-default btn-primary" (click)="goBackToResults()">Return to results list</button>
+          </div>
+        </div>
+      </div>
+      <p style="text-align:left">
+        Graph is {{selectedResult.graph_type}} based from these channels:
+        <span *ngFor="let channel of selectedResult.analysed_channels_names; let i = index">
+          {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
         </span>
+    </div>
+    <div id="my_network" class="row" style="display:inline-block;"></div>
+  </div>
+  <br>
+
+  <div class="container">
+    <div id="metrics-div" class="row">
+
+      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
+        <div class="metric-element">
+          <span class="metric-span">
+            <div>
+              <img class="metric-image" src="/assets/img/density_icon.png">
+            </div>
+            <h4>Density</h4>
+            <h1>{{selectedResult.density}}</h1>
+            <p>The proportion of edges in a graph compared to all possible edges that could be in that graph.</p>
+          </span>
+        </div>
       </div>
-      <div class="col-md-4">
-        <div [id]="getResultId(i)"></div>
+
+      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
+        <div class="metric-element">
+          <span class="metric-span">
+            <div>
+              <img class="metric-image" src="/assets/img/path_length_icon.png">
+            </div>
+            <h4>Path length</h4>
+            <h1>{{selectedResult.path_length}}</h1>
+            <p>The average distance between any two nodes in a graph.</p>
+          </span>
+        </div>
       </div>
-      <div class="col-md-3">
-        <button class="btn btn-default btn-primary" style="width:100%" (click)="enlarge(result)"> Show me more</button>
+
+      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
+        <div class="metric-element">
+          <span class="metric-span">
+            <div>
+              <img class="metric-image" src="/assets/img/edge_connectivity_icon.png">
+            </div>
+            <h4>Edge connectivity</h4>
+            <h1>{{selectedResult.edge_connectivity}}</h1>
+            <p>A minimum number of edges you have to remove before you can even hope to disconnect the graph.</p>
+          </span>
+        </div>
       </div>
-      <app-network-vis [network]="result.graph" [networkIndex]="i"></app-network-vis>
+
+      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
+        <div class="metric-element">
+          <span class="metric-span">
+            <div class>
+              <img class="metric-image" src="/assets/img/node_connectivity_icon.png">
+            </div>
+            <h4>Node connectivity</h4>
+            <h1>{{selectedResult.node_connectivity}}</h1>
+            <p>A minimum number of nodes you have to remove before you can even hope to disconnect the graph.</p>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
+
+</div>
+
+<div *ngIf="!graphVisualization">
+  <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
+    <div class="col-md-5">
+      <h3>{{result.archive_name}}</h3>
+      Graph is {{result.graph_type}} based from these channels:
+      <span *ngFor="let channel of result.analysed_channels_names; let i = index">
+        {{channel.name + (result.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+      </span>
+    </div>
+    <div class="col-md-4">
+      <div [id]="getResultId(i)"></div>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-default btn-primary" style="width:100%" (click)="enlarge(result)"> Show me more</button>
+    </div>
+    <app-network-vis [network]="result.graph" [networkIndex]="i"></app-network-vis>
+  </div>
+</div>
