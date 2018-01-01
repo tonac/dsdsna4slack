@@ -50,3 +50,14 @@
 .error-message{
   color:red !important;
 }
+
+.feature {
+  margin: 3%;
+}
+
+.feature_img {
+  width: 320pt;
+  height: 180pt;
+  display: flex; 
+  align-items: center;
+}
