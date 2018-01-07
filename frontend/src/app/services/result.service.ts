@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
-import {UserService} from './user.service';
-import {DataSet, Edge, IdType, Node} from 'vis';
+import { Injectable } from '@angular/core';
+import { Http, Response } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { UserService } from './user.service';
+import { DataSet, Edge, IdType, Node } from 'vis';
 import { AnalysisRequest } from '../model/analysisRequest';
 import { AnalysisResult } from '../model/analysisResult';
 
@@ -66,7 +66,7 @@ export class ResultService {
         maxVelocity: 146,
         solver: 'forceAtlas2Based',
         timestep: 0.35,
-        stabilization: {iterations: 150}
+        stabilization: { iterations: 150 }
       },
       interaction: {
         tooltipDelay: 100

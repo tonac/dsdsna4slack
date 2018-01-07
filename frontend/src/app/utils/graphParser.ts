@@ -1,4 +1,4 @@
-import {DataSet, Edge, IdType, Node} from 'vis';
+import { DataSet, Edge, IdType, Node } from 'vis';
 import { AnalysisResult } from '../model/analysisResult';
 
 export class GraphParser {
@@ -9,9 +9,9 @@ export class GraphParser {
     private edgeHighlightedColor: string = "rgb(217,1,102)";
 
     public parse(result: AnalysisResult): any {
-        if(result.graph_type == 'mention') {
+        if (result.graph_type == 'mention') {
             return this.parseMentionBasedGraph(result);
-        } else if(result.graph_type == 'subscription') {
+        } else if (result.graph_type == 'subscription') {
             return this.parseSubscriptionBasedGraph(result);
         }
     }
@@ -26,23 +26,23 @@ export class GraphParser {
         var userNodes = [];
         var mentionEdges = [];
 
-        for(var user of users) {
+        for (var user of users) {
             userNodes.push({
                 id: user['id'],
                 value: 5,
-                label:user['real_name'],
+                label: user['real_name'],
                 color: this.userNodeColor
             });
         }
-        for(var mention of mentions) {
+        for (var mention of mentions) {
             mentionEdges.push({
                 from: mention['sender_id'],
                 to: mention['receiver_id'],
                 value: mention['mentions'],
                 title: mention['mentions'] + ' mentions',
-                arrows:"to",
+                arrows: "to",
                 color: {
-                    color: this.edgeColor, 
+                    color: this.edgeColor,
                     highlight: this.edgeHighlightedColor
                 }
             });
@@ -54,8 +54,8 @@ export class GraphParser {
 
         // create a network
         return {
-          nodes: nodes,
-          edges: edges
+            nodes: nodes,
+            edges: edges
         };
     }
 
@@ -76,9 +76,9 @@ export class GraphParser {
         var leftOffset: number = verticalOffset;
         var rightOffset: number = verticalOffset;
 
-        if(leftHeight > rightHeight) {
+        if (leftHeight > rightHeight) {
             rightOffset = leftHeight / channels.length;
-        } else if(leftHeight < rightHeight) {
+        } else if (leftHeight < rightHeight) {
             leftOffset = rightHeight / users.length;
         }
 
@@ -86,11 +86,11 @@ export class GraphParser {
         var mentionEdges = [];
 
         var index = 0;
-        for(var user of users) {
+        for (var user of users) {
             nodesAll.push({
                 id: user['id'] + 'u',
                 value: 5,
-                label:user['real_name'],
+                label: user['real_name'],
                 x: 0,
                 y: index * leftOffset,
                 color: this.userNodeColor
@@ -99,22 +99,22 @@ export class GraphParser {
         }
 
         index = 0;
-        for(var channel of channels) {
+        for (var channel of channels) {
             nodesAll.push({
                 id: channel['id'] + 'c',
                 value: 5,
-                label:channel['name'],
+                label: channel['name'],
                 x: horizontalOffset,
-                y: index*rightOffset,
+                y: index * rightOffset,
                 color: this.channelNodeColor
             });
             index++;
         }
 
-        for(var sm of sent_messages) {
+        for (var sm of sent_messages) {
             mentionEdges.push({
-                from: sm['user_id']+'u',
-                to: sm['channel_id']+'c',
+                from: sm['user_id'] + 'u',
+                to: sm['channel_id'] + 'c',
                 value: sm['messages'],
                 title: sm['messages'] + ' messages',
                 color: {
@@ -130,8 +130,8 @@ export class GraphParser {
 
         // create a network
         return {
-          nodes: nodes,
-          edges: edges
+            nodes: nodes,
+            edges: edges
         };
     }
 }
