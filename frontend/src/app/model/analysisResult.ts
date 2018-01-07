@@ -6,6 +6,7 @@ export class AnalysisResult {
     path_length: number;
     edge_connectivity: number;
     node_connectivity: number;
+    average_clustering: number;
     graph_type: string;
     archive: number;
     graph: any;

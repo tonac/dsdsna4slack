@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { GraphParser } from '../../../utils/graphParser';
 import { Data } from '../../../model/data';
 import { AnalysisResult } from '../../../model/analysisResult';
-import { window } from 'rxjs/operator/window';
+import { UIConstants } from '../../../utils/UIConstants';
 
 @Component({
   selector: 'app-results',
@@ -18,6 +18,11 @@ export class ResultsComponent implements OnInit {
   resultsArray: Array<AnalysisResult> = [];
   public graphVisualization = false;
   public selectedResult;
+
+  public mentionExplanation = "This explains mention based graph.";
+  public subscriptionExplanation = "This explains subscription based graph.";
+
+  public UIConstants: UIConstants = new UIConstants();
 
   constructor(private data: Data, private resultService: ResultService, private route: ActivatedRoute) {
   }
@@ -45,8 +50,7 @@ export class ResultsComponent implements OnInit {
         }
       });
 
-    document.getElementById('sidebar-results').setAttribute('onclick', 'window.location.reload(false); ')
-
+    document.getElementById('sidebar-results').setAttribute('onclick', 'window.location.reload(false); ');
   }
 
   public getResultId(index) {
@@ -55,8 +59,12 @@ export class ResultsComponent implements OnInit {
 
   public enlarge(result) {
     this.graphVisualization = true;
-    this.selectedResult = result;
 
+    this.selectedResult = result;
+    this.selectedResult.density = (result.density).toFixed(2);
+    this.selectedResult.path_length = (result.path_length).toFixed(2);
+    this.selectedResult.average_clustering = (result.average_clustering).toFixed(2);
+    
     setTimeout(() => {
       let container = document.getElementById('my_network');
       let options = result.graph_type == 'mention' ? this.resultService.getOptionsForMentionBasedGraph() : this.resultService.getOptionsForSubscriptionBasedGraph();
