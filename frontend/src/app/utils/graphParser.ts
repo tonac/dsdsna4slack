@@ -29,7 +29,7 @@ export class GraphParser {
         for (var user of users) {
             userNodes.push({
                 id: user['id'],
-                value: 5,
+                title: 'Clustering: ' + user['clustering'].toFixed(3),
                 label: user['real_name'],
                 color: this.userNodeColor
             });
@@ -89,7 +89,7 @@ export class GraphParser {
         for (var user of users) {
             nodesAll.push({
                 id: user['id'] + 'u',
-                value: 5,
+                title: 'Clustering: ' + user['clustering'].toFixed(3),
                 label: user['real_name'],
                 x: 0,
                 y: index * leftOffset,
@@ -102,7 +102,7 @@ export class GraphParser {
         for (var channel of channels) {
             nodesAll.push({
                 id: channel['id'] + 'c',
-                value: 5,
+                title: 'Clustering: ' + channel['clustering'].toFixed(3),
                 label: channel['name'],
                 x: horizontalOffset,
                 y: index * rightOffset,
