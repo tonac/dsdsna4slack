@@ -34,58 +34,50 @@
   <br>
 
   <div class="container">
-    <div id="metrics-div" class="row">
+    <div id="metrics-div" class="row my-row">
 
-      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
-        <div class="metric-element">
-          <span class="metric-span">
-            <div>
-              <img class="metric-image" src="/assets/img/density_icon.png">
-            </div>
-            <h4>Density</h4>
-            <h1>{{selectedResult.density}}</h1>
-            <p>The proportion of edges in a graph compared to all possible edges that could be in that graph.</p>
-          </span>
-        </div>
+      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+        <span class="metric-span">
+          <div>
+            <img class="metric-image" src="/assets/img/density_icon.png">
+          </div>
+          <h4>Density</h4>
+          <h1>{{selectedResult.density}}</h1>
+          <p>The proportion of edges in a graph compared to all possible edges that could be in that graph.</p>
+        </span>
       </div>
 
-      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
-        <div class="metric-element">
-          <span class="metric-span">
-            <div>
-              <img class="metric-image" src="/assets/img/path_length_icon.png">
-            </div>
-            <h4>Path length</h4>
-            <h1>{{selectedResult.path_length}}</h1>
-            <p>The average distance between any two nodes in a graph.</p>
-          </span>
-        </div>
+      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+        <span class="metric-span">
+          <div>
+            <img class="metric-image" src="/assets/img/path_length_icon.png">
+          </div>
+          <h4>Path length</h4>
+          <h1>{{selectedResult.path_length}}</h1>
+          <p>The average distance between any two nodes in a graph.</p>
+        </span>
       </div>
 
-      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
-        <div class="metric-element">
-          <span class="metric-span">
-            <div>
-              <img class="metric-image" src="/assets/img/edge_connectivity_icon.png">
-            </div>
-            <h4>Edge connectivity</h4>
-            <h1>{{selectedResult.edge_connectivity}}</h1>
-            <p>A minimum number of edges you have to remove before you can even hope to disconnect the graph.</p>
-          </span>
-        </div>
+      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+        <span class="metric-span">
+          <div>
+            <img class="metric-image" src="/assets/img/edge_connectivity_icon.png">
+          </div>
+          <h4>Edge connectivity</h4>
+          <h1>{{selectedResult.edge_connectivity}}</h1>
+          <p>A minimum number of edges you have to remove before you can even hope to disconnect the graph.</p>
+        </span>
       </div>
 
-      <div class="col-xs-6 col-md-6 col-lg-3 col-xl-3" style="display: flex; align-items: center;">
-        <div class="metric-element">
-          <span class="metric-span">
-            <div class>
-              <img class="metric-image" src="/assets/img/node_connectivity_icon.png">
-            </div>
-            <h4>Node connectivity</h4>
-            <h1>{{selectedResult.node_connectivity}}</h1>
-            <p>A minimum number of nodes you have to remove before you can even hope to disconnect the graph.</p>
-          </span>
-        </div>
+      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+        <span class="metric-span">
+          <div class>
+            <img class="metric-image" src="/assets/img/node_connectivity_icon.png">
+          </div>
+          <h4>Node connectivity</h4>
+          <h1>{{selectedResult.node_connectivity}}</h1>
+          <p>A minimum number of nodes you have to remove before you can even hope to disconnect the graph.</p>
+        </span>
       </div>
     </div>
   </div>
