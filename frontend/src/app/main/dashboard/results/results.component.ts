@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { GraphParser } from '../../../utils/graphParser';
 import { Data } from '../../../model/data';
 import { AnalysisResult } from '../../../model/analysisResult';
+import { window } from 'rxjs/operator/window';
 
 @Component({
   selector: 'app-results',
@@ -25,6 +26,7 @@ export class ResultsComponent implements OnInit {
 
   public ngOnInit(): void {
     var graphParser: GraphParser = new GraphParser();
+    console.log(screen.availWidth);
     this.resultService.getResultsForUser()
     .subscribe({
       next: results => {
@@ -59,7 +61,8 @@ export class ResultsComponent implements OnInit {
     this.selectedResult = result;
     setTimeout(() => {
       let container = document.getElementById('my_network');
-      let network = new Network(container, result.graph, this.resultService.getOptions());
+      let options = result.graph_type == 'mention' ? this.resultService.getOptionsForMentionBasedGraph() : this.resultService.getOptionsForSubscriptionBasedGraph();
+      let network = new Network(container, result.graph, options);
     }, 50);
   }
 

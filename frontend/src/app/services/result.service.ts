@@ -120,8 +120,11 @@ export class ResultService {
     };
   }
 
-  getOptions() {
+  getOptionsForMentionBasedGraph() {
     return {
+      layout: {
+        improvedLayout: true
+      },
       autoResize: true,
       nodes: {
         shape: 'dot',
@@ -134,6 +137,37 @@ export class ResultService {
       },
       physics: {
         forceAtlas2Based: {
+          gravitationalConstant: -50,
+          centralGravity: 0.005,
+          springLength: 230,
+          springConstant: 0.18,
+          avoidOverlap: 0.5
+        },
+        maxVelocity: 146,
+        solver: 'forceAtlas2Based',
+        timestep: 0.35,
+        stabilization: {iterations: 150}
+      },
+      interaction: {
+        tooltipDelay: 100
+      }
+    };
+  }
+
+  getOptionsForSubscriptionBasedGraph() {
+    return {
+      autoResize: true,
+      nodes: {
+        shape: 'dot',
+        scaling: {
+          label: {
+            min: 8,
+            max: 20
+          }
+        }
+      },
+      physics: false /*{
+        forceAtlas2Based: {
           gravitationalConstant: -26,
           centralGravity: 0.005,
           springLength: 230,
@@ -143,7 +177,7 @@ export class ResultService {
         solver: 'forceAtlas2Based',
         timestep: 0.35,
         stabilization: {iterations: 150}
-      },
+      }*/,
       interaction: {
         tooltipDelay: 100
       }
