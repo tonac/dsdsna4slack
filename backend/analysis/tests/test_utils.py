@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils.timezone import now
 
 from analysis.utils import create_mention_graph, calculate_node_connectivity, calculate_edge_connectivity, \
-    calculate_average_path_length, calculate_density, create_subscription_graph
+    calculate_average_path_length, calculate_density, create_subscription_graph, calculate_average_clustering
 from archive.models import Archive, Channel, Mention, Message, SlackUser
 
 
@@ -229,26 +229,34 @@ class GraphAnalysisTest(TestCase):
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.no_message_members, self.no_members_no_messages])
 
+        clustering = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
+        self.assertEqual(graph_dict['mentions'], [], 'There should be no mentions')
+
         self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
         self.assertEqual(calculate_density(graph, graph_type), 0, 'No connection should yield 0')
         self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
         self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
-
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
-        self.assertEqual(graph_dict['mentions'], [], 'There should be no mentions')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'On not connected graph should be 0')
 
     def test_mention_graph_chain(self):
         """Test mention graph when in selected channels users mentioned form linked chain. e.g. A-B-C-D"""
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.broken_phone])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 20 / 12,
-                         'Paths ((1+2+3)*2 + (1+1+2)*2) / 12')
-        self.assertEqual(calculate_density(graph, graph_type), 1 / 2, 'All current / possible connections, 3 / 6')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 nodes, graph not connected')
+        clustering = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 2},
             {'mentions': 10, 'sender_id': 2, 'receiver_id': 3},
@@ -256,6 +264,13 @@ class GraphAnalysisTest(TestCase):
         ]
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 20 / 12,
+                         'Paths ((1+2+3)*2 + (1+1+2)*2) / 12')
+        self.assertEqual(calculate_density(graph, graph_type), 1 / 2, 'All current / possible connections, 3 / 6')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 nodes, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'No neighbours of each node are connected')
 
     def test_mention_graph_circular(self):
         """
@@ -266,12 +281,14 @@ class GraphAnalysisTest(TestCase):
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.no_members_messages])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 4 / 3, 'Paths (1+2+1)/3 + symmetrical graph')
-        self.assertEqual(calculate_density(graph, graph_type), 4 / 6, 'All current / possible connections, 4 / 6')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 2, 'Remove >= 2 nodes, graph not connected')
+        clustering = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 2},
             {'mentions': 10, 'sender_id': 2, 'receiver_id': 3},
@@ -281,18 +298,25 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 4 / 3, 'Paths (1+2+1)/3 + symmetrical graph')
+        self.assertEqual(calculate_density(graph, graph_type), 4 / 6, 'All current / possible connections, 4 / 6')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 2, 'Remove >= 2 nodes, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'No neighbours of each node are connected')
+
     def test_mention_graph_center_node(self):
         """Tests mention graph when there is center node through which all other nodes are connected. A-C B-C D-C"""
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.shelly])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 18 / 12,
-                         'Paths go through central node, 3*(1+2+2) + (1+1+1) divided by number of paths 4*3')
-        self.assertEqual(calculate_density(graph, graph_type), 3 / 6, 'All current / possible connections, 3 / 6')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        clustering = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 4, 'receiver_id': 1},
             {'mentions': 10, 'sender_id': 4, 'receiver_id': 2},
@@ -300,19 +324,27 @@ class GraphAnalysisTest(TestCase):
         ]
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['receiver_id']), mentions,
                          'Mentions are not like in loaded data')
-        # work home
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 18 / 12,
+                         'Paths go through central node, 3*(1+2+2) + (1+1+1) divided by number of paths 4*3')
+        self.assertEqual(calculate_density(graph, graph_type), 3 / 6, 'All current / possible connections, 3 / 6')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'No neighbours of each node are connected')
 
     def test_mention_graph_one_not_connected_node(self):
         """Tests mention graph when there one node not connected to the graph. A-B-C-A D"""
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.secret])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
-        self.assertEqual(calculate_density(graph, graph_type), 3 / 6, 'All current / possible connections, 3 / 6')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        clustering = [
+            {'clustering': 1, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 2},
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 3},
@@ -324,6 +356,12 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 3 / 6, 'All current / possible connections, 3 / 6')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 3 / 4, '3 nodes has connected neighbours')
+
     def test_mention_graph_two_connected_nodes(self):
         """
         Tests mention graph when there are 2 nodes connected in both directions. A-B B-A.
@@ -332,12 +370,14 @@ class GraphAnalysisTest(TestCase):
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.home])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
-        self.assertEqual(calculate_density(graph, graph_type), 1 / 6, 'All current / possible connections, 1 / 6')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        clustering = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 2, 'receiver_id': 4},
             {'mentions': 10, 'sender_id': 4, 'receiver_id': 2},
@@ -345,18 +385,25 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 1 / 6, 'All current / possible connections, 1 / 6')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'No neighbours of each node are connected')
+
     def test_mention_graph_all_nodes_connected_to_each_other(self):
         """Tests mention graph when there are all nodes interconnected in both directions. A-B A-C A-D B-C B-D C-D."""
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.work])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 1,
-                         'There should be path between each node pairs')
-        self.assertEqual(calculate_density(graph, graph_type), 1, 'All possible connections should be on the graph')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        clustering = [
+            {'clustering': 1, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 1, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 2},
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 3},
@@ -374,6 +421,13 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 1,
+                         'There should be path between each node pairs')
+        self.assertEqual(calculate_density(graph, graph_type), 1, 'All possible connections should be on the graph')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 1, 'All nodes has connected neighbours')
+
     def test_mention_graph_fewest_edges_interconnected_graph(self):
         """
         Tests mention graph when there are all nodes interconnected in just one directions.
@@ -383,13 +437,14 @@ class GraphAnalysisTest(TestCase):
         graph_type = 'mention'
         graph, graph_dict = create_mention_graph(self.archive, [self.work_single_direction])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 1,
-                         'There should be path between each node pairs')
-        self.assertEqual(calculate_density(graph, graph_type), 1, 'All possible connections should be on the graph')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        clustering = [
+            {'clustering': 1, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 1, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
         mentions = [
             {'mentions': 10, 'sender_id': 1, 'receiver_id': 2},
             {'mentions': 10, 'sender_id': 2, 'receiver_id': 3},
@@ -401,33 +456,67 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['mentions'], key=lambda x: x['sender_id']), mentions,
                          'Mentions are not like in loaded data')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 1,
+                         'There should be path between each node pairs')
+        self.assertEqual(calculate_density(graph, graph_type), 1, 'All possible connections should be on the graph')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 1, 'All nodes neighbours are connected')
+
     def test_subscription_graph_no_subscriptions(self):
         """Tests subscription graph when in selected channels there are no users subscribed to them."""
         graph_type = 'subscription'
         graph, graph_dict = create_subscription_graph(self.archive,
                                                       [self.no_members_messages, self.no_members_no_messages])
 
+        clustering_users = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
+
+        clustering_channels = [
+            {'clustering': 0, 'id': 7, 'name': 'no_members_messages'},
+            {'clustering': 0, 'id': 8, 'name': 'no_members_no_messages'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
+        self.assertEqual(graph_dict['sent_messages'], [], 'There should empty list, no users are subscribed')
+
         self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
         self.assertEqual(calculate_density(graph, graph_type), 0, 'No connection should yield 0')
         self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
         self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
-
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
-        self.assertEqual(graph_dict['sent_messages'], [], 'There should empty list, no users are subscribed')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'None nodes are connected')
 
     def test_subscription_graph_one_subscriber(self):
         """Tests subscription graph when in selected channel there is just one user subscribed to it."""
         graph_type = 'subscription'
         graph, graph_dict = create_subscription_graph(self.archive, [self.shelly])
 
+        clustering_users = [
+            {'clustering': 0, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 0, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 0, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
+
+        clustering_channels = [
+            {'clustering': 0, 'id': 5, 'name': 'shelly'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
+        sent_messages = [{'messages': 100, 'user_id': 4, 'channel_id': self.shelly.id}]
+        self.assertEqual(graph_dict['sent_messages'], sent_messages, 'There should just messages from one user')
+
         self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
         self.assertEqual(calculate_density(graph, graph_type), 1 / 4, 'Just 1 of 4 possible connections')
         self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
         self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
-
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
-        sent_messages = [{'messages': 100, 'user_id': 4, 'channel_id': self.shelly.id}]
-        self.assertEqual(graph_dict['sent_messages'], sent_messages, 'There should just messages from one user')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 0, 'No neighbours are connected')
 
     def test_subscription_graph_one_not_subscribed(self):
         """
@@ -437,12 +526,19 @@ class GraphAnalysisTest(TestCase):
         graph_type = 'subscription'
         graph, graph_dict = create_subscription_graph(self.archive, [self.secret])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
-        self.assertEqual(calculate_density(graph, graph_type), 3 / 4, 'Just 3 of 4 possible connections')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        clustering_users = [
+            {'clustering': 1, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 0, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        clustering_channels = [
+            {'clustering': 0, 'id': 3, 'name': 'secret'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
         sent_messages = [
             {'messages': 100, 'user_id': 1, 'channel_id': self.secret.id},
             {'messages': 100, 'user_id': 2, 'channel_id': self.secret.id},
@@ -451,17 +547,30 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
                          'Check sorting first if lists length is the same')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 3 / 4, 'Just 3 of 4 possible connections')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 0, 'On not connected graph should be 0')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 3 / 5)
+
     def test_subscription_graph_all_subscribed_one_channel(self):
         """Tests subscription graph when in selected channel all users are subscribed to it."""
         graph_type = 'subscription'
         graph, graph_dict = create_subscription_graph(self.archive, [self.work])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 2, 'On not connected graph should be 0')
-        self.assertEqual(calculate_density(graph, graph_type), 1, 'All users should be subscribed to channel')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        clustering_users = [
+            {'clustering': 1, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 1, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        clustering_channels = [
+            {'clustering': 0, 'id': 1, 'name': 'work'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
         sent_messages = [
             {'messages': 100, 'user_id': 1, 'channel_id': self.work.id},
             {'messages': 100, 'user_id': 2, 'channel_id': self.work.id},
@@ -470,6 +579,12 @@ class GraphAnalysisTest(TestCase):
         ]
         self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
                          'Check sorting first if lists length is the same')
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 2, 'On not connected graph should be 0')
+        self.assertEqual(calculate_density(graph, graph_type), 1, 'All users should be subscribed to channel')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 4 / 5)
 
     def test_subscription_graph_chain(self):
         """
@@ -480,13 +595,21 @@ class GraphAnalysisTest(TestCase):
         graph, graph_dict = create_subscription_graph(self.archive, [self.chain_channel_a, self.chain_channel_b,
                                                                      self.chain_channel_c])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 20 / 6,
-                         'Combination of all users pairs path length, (2+4+6+2+4+2)/6')
-        self.assertEqual(calculate_density(graph, graph_type), 6 / 12, 'On each of 3 channels, 2 of possible 4 users')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        clustering_users = [
+            {'clustering': 1 / 2, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': (1 / 2 + 1 / 3) / 2, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': (1 / 2 + 1 / 3) / 2, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 1 / 2, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        clustering_channels = [
+            {'clustering': 1 / 3, 'id': 10, 'name': 'chain_channel_a'},
+            {'clustering': 1 / 3, 'id': 11, 'name': 'chain_channel_b'},
+            {'clustering': 1 / 3, 'id': 12, 'name': 'chain_channel_c'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
         sent_messages = [
             {'messages': 0, 'user_id': 1, 'channel_id': self.chain_channel_a.id},
             {'messages': 0, 'user_id': 2, 'channel_id': self.chain_channel_a.id},
@@ -498,6 +621,14 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
                          'Check sorting first if lists length is the same')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 20 / 6,
+                         'Combination of all users pairs path length, (2+4+6+2+4+2)/6')
+        self.assertEqual(calculate_density(graph, graph_type), 6 / 12, 'On each of 3 channels, 2 of possible 4 users')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 1, 'Remove >= 1 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 34 / 84)
+
+
     def test_subscription_graph_circle(self):
         """
         Tests subscription graph when in selected channels users are connected in circle.
@@ -507,13 +638,22 @@ class GraphAnalysisTest(TestCase):
         graph, graph_dict = create_subscription_graph(self.archive, [self.chain_channel_a, self.chain_channel_b,
                                                                      self.chain_channel_c, self.chain_channel_d])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 16 / 6,
-                         'Combination of all users pairs path length, (2+2+4+2+4+2)/6')
-        self.assertEqual(calculate_density(graph, graph_type), 8 / 16, 'On each of 4 channels, 2 of possible 4 users')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
+        clustering_users = [
+            {'clustering': 1 / 3, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1 / 3, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1 / 3, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 1 / 3, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        clustering_channels = [
+            {'clustering': 1 / 3, 'id': 10, 'name': 'chain_channel_a'},
+            {'clustering': 1 / 3, 'id': 11, 'name': 'chain_channel_b'},
+            {'clustering': 1 / 3, 'id': 12, 'name': 'chain_channel_c'},
+            {'clustering': 1 / 3, 'id': 13, 'name': 'chain_channel_d'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
         sent_messages = [
             {'messages': 0, 'user_id': 1, 'channel_id': self.chain_channel_a.id},
             {'messages': 0, 'user_id': 1, 'channel_id': self.chain_channel_d.id},
@@ -527,18 +667,34 @@ class GraphAnalysisTest(TestCase):
         self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
                          'Check sorting first if lists length is the same')
 
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 16 / 6,
+                         'Combination of all users pairs path length, (2+2+4+2+4+2)/6')
+        self.assertEqual(calculate_density(graph, graph_type), 8 / 16, 'On each of 4 channels, 2 of possible 4 users')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 2, 'Remove >= 2 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 1 / 3)
+
     def test_subscription_graph_fully_connected(self):
         """Tests subscription graph when in selected channels all users are subscribed to all channels."""
         graph_type = 'subscription'
         graph, graph_dict = create_subscription_graph(self.archive,
                                                       [self.work, self.work_single_direction, self.broken_phone])
 
-        self.assertEqual(calculate_average_path_length(graph, graph_type), 2, 'All users are on the same channels')
-        self.assertEqual(calculate_density(graph, graph_type), 1, 'All users are on the same channels')
-        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
-        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        clustering_users = [
+            {'clustering': 1, 'id': 1, 'real_name': 'Howard Wolowitz'},
+            {'clustering': 1, 'id': 2, 'real_name': 'Leonard Hofstadter'},
+            {'clustering': 1, 'id': 3, 'real_name': 'Raj Koothrappali'},
+            {'clustering': 1, 'id': 4, 'real_name': 'Sheldon Cooper'},
+        ]
+        self.assertEqual(graph_dict['users'], clustering_users, 'Clustering is not as expected')
 
-        self.assertEqual(graph_dict['users'], self.users, 'Users in database does not match users in analysis')
+        clustering_channels = [
+            {'clustering': 1, 'id': 1, 'name': 'work'},
+            {'clustering': 1, 'id': 2, 'name': 'work_single_direction'},
+            {'clustering': 1, 'id': 9, 'name': 'broken_phone'},
+        ]
+        self.assertEqual(graph_dict['channels'], clustering_channels, 'Clustering is not as expected')
+
         sent_messages = [
             {'messages': 100, 'user_id': 1, 'channel_id': self.work.id},
             {'messages': 100, 'user_id': 1, 'channel_id': self.work_single_direction.id},
@@ -555,3 +711,9 @@ class GraphAnalysisTest(TestCase):
         ]
         self.assertEqual(sorted(graph_dict['sent_messages'], key=lambda x: x['user_id']), sent_messages,
                          'Check sorting first if lists length is the same')
+
+        self.assertEqual(calculate_average_path_length(graph, graph_type), 2, 'All users are on the same channels')
+        self.assertEqual(calculate_density(graph, graph_type), 1, 'All users are on the same channels')
+        self.assertEqual(calculate_edge_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_node_connectivity(graph, graph_type), 3, 'Remove >= 3 edges, graph not connected')
+        self.assertEqual(calculate_average_clustering(graph, graph_type), 1)
