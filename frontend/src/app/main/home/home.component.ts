@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {AuthenticationService} from "../../services/authentication.service";
 import {AlertService} from "../../services/alert.service";
 import { SpinnerService } from '@chevtek/angular-spinners';
+import { UIConstants } from '../../utils/UIConstants';
 
 @Component({
   moduleId: module.id,
@@ -16,6 +17,8 @@ export class HomeComponent implements OnInit {
   returnUrl: string;
   usernameErrorList = [];
   passwordErrorList = [];
+
+  public UIConstants: UIConstants = new UIConstants()
 
   constructor(private spinnerService: SpinnerService,
               private route: ActivatedRoute,
