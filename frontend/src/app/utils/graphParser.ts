@@ -27,10 +27,25 @@ export class GraphParser {
         var mentionEdges = [];
 
         for(var user of users) {
-            userNodes.push({id: user['id'], value: 5, label:user['real_name'],  color: this.userNodeColor});
+            userNodes.push({
+                id: user['id'],
+                value: 5,
+                label:user['real_name'],
+                color: this.userNodeColor
+            });
         }
         for(var mention of mentions) {
-            mentionEdges.push({from: mention['sender_id'], to: mention['receiver_id'], value:mention['mentions'], title:mention['mentions'] + ' mentions', arrows:"to", color: {color: this.edgeColor, highlight: this.edgeHighlightedColor} });
+            mentionEdges.push({
+                from: mention['sender_id'],
+                to: mention['receiver_id'],
+                value: mention['mentions'],
+                title: mention['mentions'] + ' mentions',
+                arrows:"to",
+                color: {
+                    color: this.edgeColor, 
+                    highlight: this.edgeHighlightedColor
+                }
+            });
         }
 
         nodes = new DataSet(userNodes);
@@ -68,23 +83,45 @@ export class GraphParser {
         }
 
         var nodesAll = [];
-
         var mentionEdges = [];
 
         var index = 0;
         for(var user of users) {
-            nodesAll.push({id: user['id'] + 'u', value: 5, label:user['real_name'], x: 0, y: index * leftOffset, color: this.userNodeColor});
+            nodesAll.push({
+                id: user['id'] + 'u',
+                value: 5,
+                label:user['real_name'],
+                x: 0,
+                y: index * leftOffset,
+                color: this.userNodeColor
+            });
             index++;
         }
 
         index = 0;
         for(var channel of channels) {
-            nodesAll.push({id: channel['id'] + 'c', value: 5, label:channel['name'], x: horizontalOffset, y: index*rightOffset, color: this.channelNodeColor});
+            nodesAll.push({
+                id: channel['id'] + 'c',
+                value: 5,
+                label:channel['name'],
+                x: horizontalOffset,
+                y: index*rightOffset,
+                color: this.channelNodeColor
+            });
             index++;
         }
 
         for(var sm of sent_messages) {
-            mentionEdges.push({from: sm['user_id']+'u', to: sm['channel_id']+'c', value:sm['messages'], title: sm['messages'] + ' messages', color: {color: this.edgeColor, highlight: this.edgeHighlightedColor}});
+            mentionEdges.push({
+                from: sm['user_id']+'u',
+                to: sm['channel_id']+'c',
+                value: sm['messages'],
+                title: sm['messages'] + ' messages',
+                color: {
+                    color: this.edgeColor,
+                    highlight: this.edgeHighlightedColor
+                }
+            });
         }
 
         nodes = new DataSet(nodesAll);

@@ -15,10 +15,8 @@ import { window } from 'rxjs/operator/window';
 })
 export class ResultsComponent implements OnInit {
 
-  public results;
   resultsArray: Array<AnalysisResult> = [];
   public graphVisualization = false;
-  flag: string;
   public selectedResult;
 
   constructor(private data: Data, private resultService: ResultService, private route: ActivatedRoute) {
@@ -31,7 +29,6 @@ export class ResultsComponent implements OnInit {
     .subscribe({
       next: results => {
         this.resultsArray = results;
-        this.results = [];
         var id = this.data.storage ? this.data.storage.resultsId : undefined;
         var graphToDisplay = undefined;
         for(var result of results) {
@@ -59,6 +56,7 @@ export class ResultsComponent implements OnInit {
   public enlarge(result) {
     this.graphVisualization = true;
     this.selectedResult = result;
+
     setTimeout(() => {
       let container = document.getElementById('my_network');
       let options = result.graph_type == 'mention' ? this.resultService.getOptionsForMentionBasedGraph() : this.resultService.getOptionsForSubscriptionBasedGraph();
