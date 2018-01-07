@@ -29,8 +29,13 @@ def create_mention_graph(archive, channels):
             graph.add_edge(sender, receiver, weight=number_of_mentions)
             mentions.append({'sender_id': sender.id, 'receiver_id': receiver.id, 'mentions': number_of_mentions})
 
+    clustering = nx.clustering(graph)
+    users_info = []
+    for user in users:
+        users_info.append({'id': user.id, 'real_name': user.real_name, 'clustering': clustering[user]})
+
     dictionary_graph = {
-        'users': list(users.values('id', 'real_name')),
+        'users': users_info,
         'mentions': mentions,
     }
 
@@ -46,17 +51,24 @@ def create_subscription_graph(archive, channels):
     graph.add_nodes_from(users, bipartite=0)
     graph.add_nodes_from(channels, bipartite=1)
 
-    channels_info = []
     sent_messages_info = []
     for channel in channels:
-        channels_info.append({'id': channel.id, 'name': channel.name})
         for member in channel.members.all():
             sent_messages = channel.messages.filter(slack_user=member).count()
             graph.add_edge(member, channel, weight=sent_messages)
             sent_messages_info.append({'channel_id': channel.id, 'user_id': member.id, 'messages': sent_messages})
 
+    clustering = nx.algorithms.bipartite.clustering(graph)
+    users_info = []
+    for user in users:
+        users_info.append({'id': user.id, 'real_name': user.real_name, 'clustering': clustering[user]})
+
+    channels_info = []
+    for channel in channels:
+        channels_info.append({'id': channel.id, 'name': channel.name, 'clustering': clustering[channel]})
+
     dictionary_graph = {
-        'users': list(users.values('id', 'real_name')),
+        'users': users_info,
         'channels': channels_info,
         'sent_messages': sent_messages_info
     }
@@ -83,7 +95,7 @@ def calculate_average_path_length(graph, graph_type):
             except (nx.exception.NetworkXNoPath, nx.exception.NetworkXError):
                 return 0
 
-        return sum_of_lengths / ((len(user_nodes) * len(user_nodes) - 1) / 2)
+        return sum_of_lengths / ((len(user_nodes) * (len(user_nodes) - 1)) / 2)
 
     elif graph_type == 'mention':
         try:
@@ -110,3 +122,10 @@ def calculate_node_connectivity(graph, graph_type):
 
     elif graph_type == 'mention':
         return nx.node_connectivity(graph)
+
+
+def calculate_average_clustering(graph, graph_type):
+    if graph_type == 'subscription':
+        return nx.algorithms.bipartite.average_clustering(graph)
+    elif graph_type == 'mention':
+        return nx.average_clustering(graph)

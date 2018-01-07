@@ -49,7 +49,29 @@ export class ArchiveComponent implements OnInit {
   }
 
   delete(archive: Archive) {
-    var index: number = this.archives.findIndex((o) => o == archive);
+    this.spinnerService.show('dsdSpinner');
+    this.archiveService.delete(archive.id)
+    .subscribe({
+      next:
+        success => {
+          this.spinnerService.hide('dsdSpinner'); 
+          if(success) {
+            this.removeArchiveFromList(archive.id);
+            this.alertService.success('Archive ' + archive.name + ' successfully deleted');
+          } else {
+            this.alertService.error('Something went wrong.');
+          }
+        },
+        error: error => {
+          this.spinnerService.hide('dsdSpinner');
+          this.alertService.error('Error while fetching archives: ' + error);
+        }
+    });
+
+  }
+
+  removeArchiveFromList(id: number) {
+    var index: number = this.archives.findIndex((o) => o.id == id);
     if (index !== undefined) {
       this.archives.splice(index, 1);
     }
