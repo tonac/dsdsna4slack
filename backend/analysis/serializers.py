@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from analysis.models import OverallMetrics
 from analysis.utils import create_subscription_graph, calculate_density, calculate_average_path_length, \
-    calculate_edge_connectivity, calculate_node_connectivity, create_mention_graph
+    calculate_edge_connectivity, calculate_node_connectivity, create_mention_graph, calculate_average_clustering
 from archive.serializers import Archive, Channel
 
 
@@ -77,6 +77,7 @@ class MakeOverallMetricsSerializer(serializers.ModelSerializer):
             path_length=calculate_average_path_length(graph, graph_type),
             node_connectivity=calculate_node_connectivity(graph, graph_type),
             edge_connectivity=calculate_edge_connectivity(graph, graph_type),
+            average_clustering=calculate_average_clustering(graph, graph_type),
             json_graph=dict_graph,
             graph_type=graph_type,
             analysed_channels=channels_id

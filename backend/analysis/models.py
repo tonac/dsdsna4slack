@@ -16,6 +16,7 @@ class OverallMetrics(models.Model):
     path_length = models.FloatField(blank=False)
     edge_connectivity = models.FloatField(blank=False)
     node_connectivity = models.FloatField(blank=False)
+    average_clustering = models.FloatField(blank=False)
     analysed_channels = ArrayField(models.IntegerField())
     graph_type = models.CharField(max_length=12, choices=GRAPH_TYPES, default=SUBSCRIPTION, blank=False)
 
