@@ -43,7 +43,7 @@
           </div>
           <h4>Density</h4>
           <h1>{{selectedResult.density}}</h1>
-          <p>{{selectedResult.graph_type == 'mentioned' ? UIConstants.densityExplanationForMentionBased : UIConstants.densityExplanationForSubscriptionBased}}</p>
+          <p>{{selectedResult.graph_type == 'mention' ? UIConstants.densityExplanationForMentionBased : UIConstants.densityExplanationForSubscriptionBased}}</p>
         </span>
       </div>
 
@@ -77,6 +77,17 @@
           <h4>Node connectivity</h4>
           <h1>{{selectedResult.node_connectivity}}</h1>
           <p>{{UIConstants.nodeConnectivityExplanation}}</p>
+        </span>
+      </div>
+
+      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+        <span class="metric-span">
+          <div class>
+            <img class="metric-image" src="/assets/img/clustering_icon.png">
+          </div>
+          <h4>Average clustering</h4>
+          <h1>{{selectedResult.average_clustering}}</h1>
+          <p>{{selectedResult.graph_type == 'mention' ? UIConstants.averageClusteringExplanationForMentionBased : UIConstants.averageClusteringExplanationForSubscriptionBased}}</p>
         </span>
       </div>
     </div>

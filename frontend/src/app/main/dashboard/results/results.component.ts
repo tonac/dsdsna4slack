@@ -61,10 +61,11 @@ export class ResultsComponent implements OnInit {
 
   public enlarge(result) {
     this.graphVisualization = true;
-
+    console.log(result.id);
     this.selectedResult = result;
     this.selectedResult.density = (result.density).toFixed(2);
     this.selectedResult.path_length = (result.path_length).toFixed(2);
+    this.selectedResult.average_clustering = (result.average_clustering).toFixed(2);
     
     setTimeout(() => {
       let container = document.getElementById('my_network');

@@ -23,6 +23,7 @@ export class ResultService {
   }
 
   getResultsForId(id: number): Observable<any> {
+    console.log('/api/analysis/v1/overall-metrics/' + id);
     return this.http.get(
       '/api/analysis/v1/overall-metrics/' + id,
       this.userService.jwt()
