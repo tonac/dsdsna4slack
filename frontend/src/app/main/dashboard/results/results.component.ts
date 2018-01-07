@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { GraphParser } from '../../../utils/graphParser';
 import { Data } from '../../../model/data';
 import { AnalysisResult } from '../../../model/analysisResult';
+import { UIConstants } from '../../../utils/UIConstants';
 
 @Component({
   selector: 'app-results',
@@ -22,6 +23,8 @@ export class ResultsComponent implements OnInit {
 
   public mentionExplanation = "This explains mention based graph.";
   public subscriptionExplanation = "This explains subscription based graph.";
+
+  public UIConstants: UIConstants = new UIConstants();
 
   constructor(private data: Data, private resultService: ResultService, private route: ActivatedRoute) {
   }

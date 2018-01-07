@@ -43,7 +43,7 @@
           </div>
           <h4>Density</h4>
           <h1>{{selectedResult.density}}</h1>
-          <p>The proportion of edges in a graph compared to all possible edges that could be in that graph.</p>
+          <p>{{selectedResult.graph_type == 'mentioned' ? UIConstants.densityExplanationForMentionBased : UIConstants.densityExplanationForSubscriptionBased}}</p>
         </span>
       </div>
 
@@ -54,7 +54,7 @@
           </div>
           <h4>Path length</h4>
           <h1>{{selectedResult.path_length}}</h1>
-          <p>The average distance between any two nodes in a graph.</p>
+          <p>{{UIConstants.pathLengthExplanation}}</p>
         </span>
       </div>
 
@@ -65,7 +65,7 @@
           </div>
           <h4>Edge connectivity</h4>
           <h1>{{selectedResult.edge_connectivity}}</h1>
-          <p>A minimum number of edges you have to remove before you can even hope to disconnect the graph.</p>
+          <p>{{UIConstants.edgeConnectivityExplanation}}</p>
         </span>
       </div>
 
@@ -76,7 +76,7 @@
           </div>
           <h4>Node connectivity</h4>
           <h1>{{selectedResult.node_connectivity}}</h1>
-          <p>A minimum number of nodes you have to remove before you can even hope to disconnect the graph.</p>
+          <p>{{UIConstants.nodeConnectivityExplanation}}</p>
         </span>
       </div>
     </div>
