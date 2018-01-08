@@ -30,8 +30,6 @@ export class ResultsComponent implements OnInit {
   public UIConstants: UIConstants = new UIConstants();
 
   public filters: FilterModel;
-  public form: FormGroup; 
-
 
   constructor(private data: Data, private resultService: ResultService, private route: ActivatedRoute) {
   }
@@ -75,28 +73,6 @@ export class ResultsComponent implements OnInit {
   formChanged() {
     console.log(this.filters);
   }
-
-  // setupForm() {
-  //   this.form
-  //   .valueChanges
-  //   .debounceTime(1000)
-  //   .subscribe(s => {
-  //     if(s['minNodeClustering']) {
-  //       this.filters.minimumNodeClustering = Number(s['minNodeClustering']);
-  //     }
-  //     if(s['maxNodeClustering']) {
-  //       this.filters.maximumNodeClustering = Number(s['maxNodeClustering']);
-  //     }
-
-  //     if(s['minInDegree']) {
-  //       this.filters.minimumInDegree = Number(s['minInDegree']);
-  //     }
-  //     if(s['maxInDegree']) {
-  //       this.filters.maximumInDegree = Number(s['maxInDegree']);
-  //     }
-  //     console.log(this.filters);
-  //   });
-  // }
 
   public getResultId(index) {
     return 'network' + index;
