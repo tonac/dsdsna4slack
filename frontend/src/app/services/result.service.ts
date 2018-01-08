@@ -33,7 +33,7 @@ export class ResultService {
 
   getPublicResultForKey(key: string) : Observable<AnalysisResult> {
     return this.http.get(
-      '/api/analysis/v1/overall-metrics/' + key
+      '/api/analysis/v1/share/' + key
     ).map((response: Response) => {
       return response.json() as AnalysisResult;
     });
