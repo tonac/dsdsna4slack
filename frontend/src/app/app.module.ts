@@ -23,6 +23,7 @@ import { NetworkVisComponent } from './components/network-vis/network-vis.compon
 import { SpinnerModule } from '@chevtek/angular-spinners';
 import { Data } from './model/data';
 import { ShareService } from './services/share.service';
+import { PublicShareComponent } from './main/publicShare/publicShare.component';
 
 
 let homeState = {name: 'home', url: '/', component: HomeComponent};
@@ -47,7 +48,8 @@ let registerState = {name: 'register', url: '/register', component: RegisterComp
     AnalyseComponent,
     ResultsComponent,
     ShareComponent,
-    NetworkVisComponent
+    NetworkVisComponent,
+    PublicShareComponent
   ],
   providers: [
     AuthGuard,
