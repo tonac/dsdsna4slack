@@ -44,6 +44,11 @@ export class GraphParser {
                 outDegree[nodeFrom] = outDegree[nodeFrom] ? outDegree[nodeFrom] + 1 : 1;
             }
 
+            console.log(nodes);
+
+            console.log(inDegree);
+            console.log(outDegree);
+
             // prune the nodes
             for (let id in nodes) {
                 let node = nodes[id];
@@ -56,6 +61,8 @@ export class GraphParser {
                 if(node.id.indexOf('u') == -1) {
                     if(inDegree[node.id]) {
                         if(inDegree[node.id] < minimumInDegree || inDegree[node.id] > maximumInDegree) continue;
+                    } else {
+                        continue;
                     }
                 }
 
@@ -63,6 +70,8 @@ export class GraphParser {
                 if(node.id.indexOf('c') == -1){
                     if(outDegree[node.id]) {
                         if(outDegree[node.id] < minimumOutDegree || outDegree[node.id] > maximumOutDegree) continue;
+                    } else {
+                        continue;
                     }
                 }
                 compatibleNodes.add(node.id);
