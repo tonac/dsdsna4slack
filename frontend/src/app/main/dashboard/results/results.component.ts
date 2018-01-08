@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import {ResultService} from '../../../services/result.service';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import {Network} from 'vis';
@@ -7,6 +8,8 @@ import { GraphParser } from '../../../utils/graphParser';
 import { Data } from '../../../model/data';
 import { AnalysisResult } from '../../../model/analysisResult';
 import { UIConstants } from '../../../utils/UIConstants';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { FilterModel } from '../../../model/filterModel'
 
 @Component({
   selector: 'app-results',
@@ -26,11 +29,16 @@ export class ResultsComponent implements OnInit {
 
   public UIConstants: UIConstants = new UIConstants();
 
+  public filters: FilterModel;
+  public form: FormGroup; 
+
+
   constructor(private data: Data, private resultService: ResultService, private route: ActivatedRoute) {
   }
 
   public ngOnInit(): void {
     var graphParser: GraphParser = new GraphParser();
+    this.filters = new FilterModel();
     this.resultService.getResultsForUser()
     .subscribe({
       next: results => {
@@ -52,8 +60,43 @@ export class ResultsComponent implements OnInit {
       }
     });
 
+    this.form = new FormGroup({
+      'minNodeClustering': new FormControl(),
+      'maxNodeClustering': new FormControl(),
+      'minInDegree': new FormControl(),
+      'maxInDegree': new FormControl()
+    });
+
+    // this.setupForm();
+
     document.getElementById('sidebar-results').setAttribute('onclick', 'window.location.reload(false); ');
   }
+
+  formChanged() {
+    console.log(this.filters);
+  }
+
+  // setupForm() {
+  //   this.form
+  //   .valueChanges
+  //   .debounceTime(1000)
+  //   .subscribe(s => {
+  //     if(s['minNodeClustering']) {
+  //       this.filters.minimumNodeClustering = Number(s['minNodeClustering']);
+  //     }
+  //     if(s['maxNodeClustering']) {
+  //       this.filters.maximumNodeClustering = Number(s['maxNodeClustering']);
+  //     }
+
+  //     if(s['minInDegree']) {
+  //       this.filters.minimumInDegree = Number(s['minInDegree']);
+  //     }
+  //     if(s['maxInDegree']) {
+  //       this.filters.maximumInDegree = Number(s['maxInDegree']);
+  //     }
+  //     console.log(this.filters);
+  //   });
+  // }
 
   public getResultId(index) {
     return 'network' + index;
