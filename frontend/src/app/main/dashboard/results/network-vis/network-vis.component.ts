@@ -19,7 +19,8 @@ export class NetworkVisComponent implements OnInit {
     console.log(this.networkIndex);
     setTimeout(() => {
       const container = document.getElementById('network' + this.networkIndex);
-      const network = new Network(container, this.network, this.resultService.getOptions());
+      const options = this.network.graph_type == 'mention' ? this.resultService.getOptionsForMentionBasedGraph() : this.resultService.getOptionsForSubscriptionBasedGraph();
+      const network = new Network(container, this.network.graph, options);
     }, 50);
   }
 
