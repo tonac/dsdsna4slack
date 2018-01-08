@@ -4,3 +4,4 @@ pytz==2017.2
 coreapi==2.3.3
 psycopg2==2.7.3
 networkx==2.0
+gunicorn==19.7.1

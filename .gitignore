@@ -101,3 +101,6 @@ package-lock.json
 gradlew
 gradlew\.bat
 postgresql
+
+nginx/backend/
+nginx/frontend/
