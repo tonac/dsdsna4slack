@@ -1,7 +1,9 @@
+import uuid
+
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
 
-from archive.models import Archive, Channel
+from archive.models import Archive
 
 
 class OverallMetrics(models.Model):
@@ -11,6 +13,7 @@ class OverallMetrics(models.Model):
 
     archive = models.ForeignKey(Archive, on_delete=models.CASCADE)
     public = models.BooleanField(default=False)
+    public_key = models.UUIDField(default=uuid.uuid4, editable=False)
     json_graph = JSONField()
     density = models.FloatField(blank=False)
     path_length = models.FloatField(blank=False)

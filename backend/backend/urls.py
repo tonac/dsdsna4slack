@@ -20,10 +20,10 @@ from . import views
 
 urlpatterns = [
     url(r'^backend/account/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^apis/$', views.api_root),
+    url(r'^backend/admin/', admin.site.urls),
+    # url(r'^apis/$', views.api_root),
     url(r'^api/authentication/', include('authentication.urls')),
     url(r'^api/archive/', include('archive.urls')),
     url(r'^api/analysis/', include('analysis.urls')),
-    url(r'^docs/', include_docs_urls(title='SNA 4 Slack APIs', public=True)),
+    url(r'^api/docs/', include_docs_urls(title='SNA 4 Slack APIs', public=True)),
 ]
