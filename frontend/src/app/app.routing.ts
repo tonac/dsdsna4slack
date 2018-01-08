@@ -9,7 +9,7 @@ const appRoutes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'register', component: RegisterComponent},
   ...DashboardRoutes,
-  {path: 'share', component: PublicShareComponent},
+  {path: 'shared/:id', component: PublicShareComponent},
 
   // otherwise redirect to home
   {path: '**', redirectTo: ''}
