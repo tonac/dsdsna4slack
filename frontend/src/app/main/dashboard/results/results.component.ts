@@ -7,7 +7,6 @@ import { GraphParser } from '../../../utils/graphParser';
 import { Data } from '../../../model/data';
 import { AnalysisResult } from '../../../model/analysisResult';
 import { UIConstants } from '../../../utils/UIConstants';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { FilterModel } from '../../../model/filterModel'
 
 @Component({
@@ -66,13 +65,6 @@ export class ResultsComponent implements OnInit {
 
     let minimumOutDegree: number = Number(this.filters.minimumOutDegree) ? Number(this.filters.minimumOutDegree) : 0;
     let maximumOutDegree: number = Number(this.filters.maximumOutDegree) ? Number(this.filters.maximumOutDegree) : Number.MAX_VALUE;
-    
-    console.log(minimumNodeClustering + " " +
-      maximumNodeClustering + " " +
-      minimumInDegree + " " +
-      maximumInDegree + " " +
-      minimumOutDegree + " " +
-      maximumOutDegree);
 
     let graphParser = new GraphParser();
     var result = this.copyObject(this.selectedResult);
@@ -118,14 +110,11 @@ export class ResultsComponent implements OnInit {
   copyObject<T> (object:T): T {
     var objectCopy = <T>{};
 
-    for (var key in object)
-    {
-        if (object.hasOwnProperty(key))
-        {
+    for (var key in object) {
+        if (object.hasOwnProperty(key)) {
             objectCopy[key] = object[key];
         }
     }
-
     return objectCopy;
   }
 }
