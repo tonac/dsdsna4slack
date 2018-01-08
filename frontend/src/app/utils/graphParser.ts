@@ -16,6 +16,87 @@ export class GraphParser {
         }
     }
 
+    public prune(graph: any,
+        minimumNodeClustering: number,
+        maximumNodeClustering: number,
+        minimumInDegree: number,
+        maximumInDegree: number,
+        minimumOutDegree: number,
+        maximumOutDegree: number): any {
+            
+            let edges = graph.edges._data;
+            let nodes = graph.nodes._data;
+
+            var newNodes = [];
+            var newEdges = [];
+
+            var compatibleNodes: Set<string> = new Set<string>();
+            var inDegree = {};
+            var outDegree = {};
+
+            // calculate in/out degrees
+            for (let id in edges) {
+                let edge = edges[id];
+                let nodeFrom = edge.from;
+                let nodeTo = edge.to;
+
+                inDegree[nodeTo] = inDegree[nodeTo] ? inDegree[nodeTo] + 1 : 1;
+                outDegree[nodeFrom] = outDegree[nodeFrom] ? outDegree[nodeFrom] + 1 : 1;
+            }
+
+            // prune the nodes
+            for (let id in nodes) {
+                let node = nodes[id];
+                let nodeClustering = Number(node.title.replace('Clustering: ', ''));
+                if (nodeClustering) {
+                    if(nodeClustering < minimumNodeClustering || nodeClustering > maximumNodeClustering) continue;
+                }
+
+                // it's not a user node in subscription graph
+                if(node.id.indexOf('u') == -1) {
+                    if(inDegree[node.id]) {
+                        if(inDegree[node.id] < minimumInDegree || inDegree[node.id] > maximumInDegree) continue;
+                    } else {
+                        continue;
+                    }
+                }
+
+                // it's not a channel node in subscription graph
+                if(node.id.indexOf('c') == -1){
+                    if(outDegree[node.id]) {
+                        if(outDegree[node.id] < minimumOutDegree || outDegree[node.id] > maximumOutDegree) continue;
+                    } else {
+                        continue;
+                    }
+                }
+                compatibleNodes.add(node.id);
+            }
+
+            if(compatibleNodes.size > 0) {
+                for(let id in edges) {
+                    let edge = edges[id];
+                    let nodeFrom = edge.from;
+                    let nodeTo = edge.to;
+    
+                    if(compatibleNodes.has(nodeFrom) && compatibleNodes.has(nodeTo)){
+                        newEdges.push(edge);
+                    }
+                }
+            }
+
+            if(newEdges.length > 0) {
+                compatibleNodes.forEach( id => {
+                    newNodes.push(nodes[id]);
+                });
+            }
+
+            // create a network
+            return {
+                nodes: new DataSet(newNodes),
+                edges: new DataSet(newEdges)
+            };
+    }
+
     parseMentionBasedGraph(result: AnalysisResult): any {
         let nodes: Node = new DataSet([]);
         let edges: Edge = new DataSet([]);
@@ -28,7 +109,7 @@ export class GraphParser {
 
         for (var user of users) {
             userNodes.push({
-                id: user['id'],
+                id: user['id'] + '',
                 title: 'Clustering: ' + user['clustering'].toFixed(3),
                 label: user['real_name'],
                 color: this.userNodeColor
@@ -36,8 +117,8 @@ export class GraphParser {
         }
         for (var mention of mentions) {
             mentionEdges.push({
-                from: mention['sender_id'],
-                to: mention['receiver_id'],
+                from: mention['sender_id'] + '',
+                to: mention['receiver_id'] + '',
                 value: mention['mentions'],
                 title: mention['mentions'] + ' mentions',
                 arrows: "to",

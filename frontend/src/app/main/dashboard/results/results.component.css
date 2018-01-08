@@ -7,6 +7,9 @@
 .vertical-align {
   display: flex;
   align-items: center;
+}
+
+.padding-with-border {
   height: 10%;
   padding-bottom: 2.5%;
   padding-top: 2.5%;
