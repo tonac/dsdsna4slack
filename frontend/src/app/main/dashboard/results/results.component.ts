@@ -84,7 +84,6 @@ export class ResultsComponent implements OnInit {
       minimumOutDegree,
       maximumOutDegree);
 
-
     this.displayGraph(result);
   }
 
