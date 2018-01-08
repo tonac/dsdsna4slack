@@ -10,11 +10,12 @@ export class ShareService {
     constructor(private http: Http, private userService: UserService) {
     }
 
-    setShare(resultID: number): Observable<boolean> {
+    setShare(resultID: string): Observable<boolean> {
         return this.http.put(
-            '/api/analysis/v1/overall-metrics/' + resultID,
+            '/api/analysis/v1/overall-metrics/' + resultID + '/',
             this.userService.jwt()
         ).map((response: Response) => {
+            console.log(response);
             return response.status == 200;
         })
     }

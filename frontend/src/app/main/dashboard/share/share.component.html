@@ -24,7 +24,7 @@
       <button id="{{result.id}}-share-button" class="btn btn-default btn-primary" style="width:100%" (click)='toogleShare(result, result.id)'>
          {{result.public ? 'Stop sharing' : 'Share'}}
         </button>
-        <a *ngIf="result.public" id="{{result.id}}-share-link" [href]="shareLinkFor(result.id)" style="width:inherit; text-align:center;"> link to the graph</a>
+        <a *ngIf="result.public" id="{{result.public_key}}-share-link" [href]="shareLinkFor(result.public_key)" style="width:inherit; text-align:center;"> link to the graph</a>
     </div>
     <app-network-vis [network]="result" [networkIndex]="i"></app-network-vis>
   </div>

@@ -43,36 +43,36 @@ export class ShareComponent implements OnInit {
     return 'network' + index;
   }
 
-  toogleShare(result: AnalysisResult, id: number) {
-    this.shareService.setShare(id, !result.public)
+  toogleShare(result: AnalysisResult, id: string) {
+    this.shareService.setShare(id)
     .catch((err: any, caught: Observable<boolean>) => {
       return Observable.of(false);
     })
     .subscribe({
       next: requestResult => {
-        if(!requestResult) {
+        if(requestResult) {
           result.public = !result.public;
         }
       }
     })
   }
 
-  updateUI(isPublic: boolean, id: string) {
-    let button = document.getElementById(id + '-share-button');
-    let link = <HTMLLinkElement>document.getElementById(id + '-share-link');
+  // updateUI(isPublic: boolean, id: string) {
+  //   let button = document.getElementById(id + '-share-button');
+  //   let link = <HTMLLinkElement>document.getElementById(id + '-share-link');
 
-    if(isPublic) {
-      button.innerText = 'Stop sharing';
-      link.style.display = 'block';
-      link.href = window.location.href.substring(0, -1) + 'shared/' + id;
-      link.textContent = "link to results"
-    } else {
-      button.innerText = 'Share';
-      link.style.display = 'none';
-    }
-  }
+  //   if(isPublic) {
+  //     button.innerText = 'Stop sharing';
+  //     link.style.display = 'block';
+  //     link.href = window.location.href.substring(0, -1) + 'shared/' + id;
+  //     link.textContent = "link to results"
+  //   } else {
+  //     button.innerText = 'Share';
+  //     link.style.display = 'none';
+  //   }
+  // }
 
   shareLinkFor(id: string) {
-    return window.location.href.substring(0, -1) + 'shared/' + id;
+    return window.location.href.substring(0, -1) + 'shared/' + id.replace;
   }
 }
