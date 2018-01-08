@@ -29,8 +29,8 @@
             {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
           </span>
       </div>
-      <div id="my_network" class="row" style="display:inline-block;"></div>
-    </div>
+      
+    
 
     <div style="text-align:left; margin:2%;">
       <h3> Prune your graph: </h3>
@@ -127,8 +127,9 @@
         </div>
       </div>
     </div>
-  
   </div>
+  </div>
+</div>
   
   <div *ngIf="!graphVisualization">
     <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">

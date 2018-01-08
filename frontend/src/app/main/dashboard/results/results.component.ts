@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-import {Component, OnInit} from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import {ResultService} from '../../../services/result.service';
-=======
 import { Component, OnInit } from '@angular/core';
 import { ResultService } from '../../../services/result.service';
->>>>>>> displaying_graphs
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Network } from 'vis';
 import { Observable } from 'rxjs/Observable';
@@ -39,11 +33,8 @@ export class ResultsComponent implements OnInit {
 
   public ngOnInit(): void {
     var graphParser: GraphParser = new GraphParser();
-<<<<<<< HEAD
     this.filters = new FilterModel();
-=======
 
->>>>>>> displaying_graphs
     this.resultService.getResultsForUser()
       .subscribe({
         next: results => {
@@ -63,16 +54,6 @@ export class ResultsComponent implements OnInit {
           }
         }
       });
-
-    this.form = new FormGroup({
-      'minNodeClustering': new FormControl(),
-      'maxNodeClustering': new FormControl(),
-      'minInDegree': new FormControl(),
-      'maxInDegree': new FormControl()
-    });
-
-    // this.setupForm();
-
     document.getElementById('sidebar-results').setAttribute('onclick', 'window.location.reload(false); ');
   }
 
