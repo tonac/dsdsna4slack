@@ -29,10 +29,45 @@
             {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
           </span>
       </div>
-      <div id="my_network" class="row" style="display:inline-block;"></div>
+      
+    
+
+    <div style="text-align:left; margin:2%;">
+      <h3> Prune your graph: </h3>
+      <form class="form-horizontal " style="margin:1%;">
+          <div class="row vertical-align" style="margin:10px;">
+              <div class="col-sm-5 col-md-5 col-lg-4 col-xl-2">
+                  <label>Node clustering</label>
+                </div>
+                  <div class="col-sm-3 col-md-3 col-lg-2 col-xl-2" ><input class="form-control" type="text" [(ngModel)]="filters.minimumNodeClustering" (change)="formChanged()" name="minimumNodeClustering" placeholder="from"/></div>
+                  <div class="col-sm-3 col-md-3 col-lg-2 col-xl-2"><input class="form-control" type="text" [(ngModel)]="filters.maximumNodeClustering" (change)="formChanged()"name="maximumNodeClustering" placeholder="to"/></div>
+          </div>
+
+          <div class="row vertical-align" style="margin:10px;">
+              <div class="col-sm-5 col-md-5 col-lg-4 col-xl-2">
+                <label *ngIf="selectedResult.graph_type == 'mention'">Number of people mentioned by</label>
+                <label *ngIf="selectedResult.graph_type == 'subscription'">Number of people subscribed to a channel</label>
+              </div>
+              <div class="col-sm-3 col-md-3 col-lg-2 col-xl-2" ><input class="form-control" type="text" [(ngModel)]="filters.minimumInDegree" (change)="formChanged()" name="minimumInDegree" placeholder="from"/></div>
+              <div class="col-sm-3 col-md-3 col-lg-2 col-xl-2"><input  class="form-control" type="text" [(ngModel)]="filters.maximumInDegree" (change)="formChanged()" name="maximumInDegree" placeholder="to"/></div>
+          </div>
+        
+          <div class="row vertical-align" style="margin:10px;">
+              <div class="col-sm-5 col-md-5 col-lg-4 col-xl-2" >
+                <label *ngIf="selectedResult.graph_type == 'mention'" >Number of people mentioned</label>
+                <label *ngIf="selectedResult.graph_type == 'subscription'">Number of subscribed channels</label>
+              </div>
+              <div class="col-sm-3 col-md-3 col-lg-2 col-xl-2"><input class="form-control" type="text" [(ngModel)]="filters.minimumOutDegree" (change)="formChanged()" name="minimumOutDegree" placeholder="from"/></div>
+              <div class="col-sm-3 col-md-3 col-lg-2 col-xl-2"><input class="form-control" type="text" [(ngModel)]="filters.maximumOutDegree" (change)="formChanged()" name="maximumOutDegree" placeholder="to"/></div>
+          </div>
+      </form>
     </div>
-    <br>
-  
+    <div id="my_network" class="row" style="display:inline-block;"></div>
+  </div>
+  <br>
+
+  <div class="container">
+    <div id="metrics-div" class="row my-row">
     <div class="container">
       <div id="metrics-div" class="row my-row">
   
@@ -92,11 +127,12 @@
         </div>
       </div>
     </div>
-  
   </div>
+  </div>
+</div>
   
   <div *ngIf="!graphVisualization">
-    <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
+    <div class="row vertical-align padding-with-border" *ngFor="let result of resultsArray; let i = index">
       <div class="col-md-5">
         <h3>{{result.archive_name}}</h3>
         Graph is {{result.graph_type}} based from these channels:
