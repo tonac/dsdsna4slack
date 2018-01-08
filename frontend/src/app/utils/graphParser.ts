@@ -44,11 +44,6 @@ export class GraphParser {
                 outDegree[nodeFrom] = outDegree[nodeFrom] ? outDegree[nodeFrom] + 1 : 1;
             }
 
-            console.log(nodes);
-
-            console.log(inDegree);
-            console.log(outDegree);
-
             // prune the nodes
             for (let id in nodes) {
                 let node = nodes[id];
