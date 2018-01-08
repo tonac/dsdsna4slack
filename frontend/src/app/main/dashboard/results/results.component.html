@@ -1,115 +1,116 @@
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-md-10" style="display: flex; align-items: center;">
-      <h1 style="line-height:inherit;justify-content:center">
-        Results
-      </h1>
+    <div class="row">
+      <div class="col-md-10" style="display: flex; align-items: center;">
+        <h1 style="line-height:inherit;justify-content:center">
+          Results
+        </h1>
+      </div>
     </div>
   </div>
-</div>
-
-<div *ngIf="graphVisualization">
-  <div style="width:100%; text-align:center;">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-10" style="display: flex; align-items: center;">
-          <h1 style="line-height:inherit;justify-content:center">
-            {{selectedResult.archive_name}}
-          </h1>
+  
+  <div *ngIf="graphVisualization">
+    <div style="width:100%; text-align:center;">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-10" style="display: flex; align-items: center;">
+            <h1 style="line-height:inherit;justify-content:center">
+              {{selectedResult.archive_name}}
+            </h1>
+          </div>
+          <div class="col-md-2" style="display: flex; align-items:right;">
+            <div class="row" style="padding-top: 20px">
+              <button class="btn btn-default btn-primary" (click)="goBackToResults()">Return to results list</button>
+            </div>
+          </div>
         </div>
-        <div class="col-md-2" style="display: flex; align-items:right;">
-          <div class="row" style="padding-top: 20px">
-            <button class="btn btn-default btn-primary" (click)="goBackToResults()">Return to results list</button>
-          </div>
+        <p style="text-align:left">
+          Graph is {{selectedResult.graph_type}} based from these channels:
+          <span *ngFor="let channel of selectedResult.analysed_channels_names; let i = index">
+            {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+          </span>
+      </div>
+      <div id="my_network" class="row" style="display:inline-block;"></div>
+    </div>
+    <br>
+  
+    <div class="container">
+      <div id="metrics-div" class="row my-row">
+  
+        <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+          <span class="metric-span">
+            <div>
+              <img class="metric-image" src="/assets/img/density_icon.png">
+            </div>
+            <h4>Density</h4>
+            <h1>{{selectedResult.density}}</h1>
+            <p>{{selectedResult.graph_type == 'mention' ? UIConstants.densityExplanationForMentionBased : UIConstants.densityExplanationForSubscriptionBased}}</p>
+          </span>
+        </div>
+  
+        <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+          <span class="metric-span">
+            <div>
+              <img class="metric-image" src="/assets/img/path_length_icon.png">
+            </div>
+            <h4>Path length</h4>
+            <h1>{{selectedResult.path_length}}</h1>
+            <p>{{UIConstants.pathLengthExplanation}}</p>
+          </span>
+        </div>
+  
+        <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+          <span class="metric-span">
+            <div>
+              <img class="metric-image" src="/assets/img/edge_connectivity_icon.png">
+            </div>
+            <h4>Edge connectivity</h4>
+            <h1>{{selectedResult.edge_connectivity}}</h1>
+            <p>{{UIConstants.edgeConnectivityExplanation}}</p>
+          </span>
+        </div>
+  
+        <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+          <span class="metric-span">
+            <div class>
+              <img class="metric-image" src="/assets/img/node_connectivity_icon.png">
+            </div>
+            <h4>Node connectivity</h4>
+            <h1>{{selectedResult.node_connectivity}}</h1>
+            <p>{{UIConstants.nodeConnectivityExplanation}}</p>
+          </span>
+        </div>
+  
+        <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+          <span class="metric-span">
+            <div class>
+              <img class="metric-image" src="/assets/img/clustering_icon.png">
+            </div>
+            <h4>Average clustering</h4>
+            <h1>{{selectedResult.average_clustering}}</h1>
+            <p>{{selectedResult.graph_type == 'mention' ? UIConstants.averageClusteringExplanationForMentionBased : UIConstants.averageClusteringExplanationForSubscriptionBased}}</p>
+          </span>
         </div>
       </div>
-      <p style="text-align:left">
-        Graph is {{selectedResult.graph_type}} based from these channels:
-        <span *ngFor="let channel of selectedResult.analysed_channels_names; let i = index">
-          {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
-        </span>
     </div>
-    <div id="my_network" class="row" style="display:inline-block;"></div>
+  
   </div>
-  <br>
-
-  <div class="container">
-    <div id="metrics-div" class="row my-row">
-
-      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
-        <span class="metric-span">
-          <div>
-            <img class="metric-image" src="/assets/img/density_icon.png">
-          </div>
-          <h4>Density</h4>
-          <h1>{{selectedResult.density}}</h1>
-          <p>{{selectedResult.graph_type == 'mention' ? UIConstants.densityExplanationForMentionBased : UIConstants.densityExplanationForSubscriptionBased}}</p>
+  
+  <div *ngIf="!graphVisualization">
+    <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
+      <div class="col-md-5">
+        <h3>{{result.archive_name}}</h3>
+        Graph is {{result.graph_type}} based from these channels:
+        <span *ngFor="let channel of result.analysed_channels_names; let i = index">
+          {{channel.name + (result.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
         </span>
       </div>
-
-      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
-        <span class="metric-span">
-          <div>
-            <img class="metric-image" src="/assets/img/path_length_icon.png">
-          </div>
-          <h4>Path length</h4>
-          <h1>{{selectedResult.path_length}}</h1>
-          <p>{{UIConstants.pathLengthExplanation}}</p>
-        </span>
+      <div class="col-md-4">
+        <div [id]="getResultId(i)"></div>
       </div>
-
-      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
-        <span class="metric-span">
-          <div>
-            <img class="metric-image" src="/assets/img/edge_connectivity_icon.png">
-          </div>
-          <h4>Edge connectivity</h4>
-          <h1>{{selectedResult.edge_connectivity}}</h1>
-          <p>{{UIConstants.edgeConnectivityExplanation}}</p>
-        </span>
+      <div class="col-md-3">
+        <button class="btn btn-default btn-primary" style="width:100%" (click)="enlarge(result)"> Show me more</button>
       </div>
-
-      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
-        <span class="metric-span">
-          <div class>
-            <img class="metric-image" src="/assets/img/node_connectivity_icon.png">
-          </div>
-          <h4>Node connectivity</h4>
-          <h1>{{selectedResult.node_connectivity}}</h1>
-          <p>{{UIConstants.nodeConnectivityExplanation}}</p>
-        </span>
-      </div>
-
-      <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
-        <span class="metric-span">
-          <div class>
-            <img class="metric-image" src="/assets/img/clustering_icon.png">
-          </div>
-          <h4>Average clustering</h4>
-          <h1>{{selectedResult.average_clustering}}</h1>
-          <p>{{selectedResult.graph_type == 'mention' ? UIConstants.averageClusteringExplanationForMentionBased : UIConstants.averageClusteringExplanationForSubscriptionBased}}</p>
-        </span>
-      </div>
+      <app-network-vis [network]="result" [networkIndex]="i"></app-network-vis>
     </div>
   </div>
-
-</div>
-
-<div *ngIf="!graphVisualization">
-  <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
-    <div class="col-md-5">
-      <h3>{{result.archive_name}}</h3>
-      Graph is {{result.graph_type}} based from these channels:
-      <span *ngFor="let channel of result.analysed_channels_names; let i = index">
-        {{channel.name + (result.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
-      </span>
-    </div>
-    <div class="col-md-4">
-      <div [id]="getResultId(i)"></div>
-    </div>
-    <div class="col-md-3">
-      <button class="btn btn-default btn-primary" style="width:100%" (click)="enlarge(result)"> Show me more</button>
-    </div>
-    <app-network-vis [network]="result.graph" [networkIndex]="i"></app-network-vis>
-  </div>
-</div>
+  
