@@ -24,18 +24,13 @@ export class GraphParser {
         minimumOutDegree: number,
         maximumOutDegree: number): any {
             
-            console.log('pruning');
-
             let edges = graph.edges._data;
             let nodes = graph.nodes._data;
-
-            console.log(nodes);
 
             var newNodes = [];
             var newEdges = [];
 
             var compatibleNodes: Set<string> = new Set<string>();
-            // var nodesToAdd = {};
             var inDegree = {};
             var outDegree = {};
 
