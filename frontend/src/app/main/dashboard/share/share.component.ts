@@ -32,9 +32,6 @@ export class ShareComponent implements OnInit {
           var graphToDisplay = undefined;
           for (var result of results) {
             let graph = graphParser.parse(result);
-            if (id == result.id) {
-              graphToDisplay = result;
-            }
             result.json_graph = undefined;
             result.graph = graph;
           }
@@ -55,20 +52,27 @@ export class ShareComponent implements OnInit {
       next: requestResult => {
         if(!requestResult) {
           result.public = !result.public;
-          let button = document.getElementById(id + '-share-button');
-          let link = <HTMLLinkElement>document.getElementById(id + '-share-link');
-
-          if(result.public) {
-            button.innerText = 'Stop sharing';
-            link.style.display = 'block';
-            link.href = window.location.href.substring(0, -1) + 'results/' + id;
-          link.textContent = "link to results"
-          } else {
-            button.innerText = 'Share';
-            link.style.display = 'none';
-          }
         }
       }
     })
+  }
+
+  updateUI(isPublic: boolean, id: string) {
+    let button = document.getElementById(id + '-share-button');
+    let link = <HTMLLinkElement>document.getElementById(id + '-share-link');
+
+    if(isPublic) {
+      button.innerText = 'Stop sharing';
+      link.style.display = 'block';
+      link.href = window.location.href.substring(0, -1) + 'shared/' + id;
+      link.textContent = "link to results"
+    } else {
+      button.innerText = 'Share';
+      link.style.display = 'none';
+    }
+  }
+
+  shareLinkFor(id: string) {
+    return window.location.href.substring(0, -1) + 'shared/' + id;
   }
 }
