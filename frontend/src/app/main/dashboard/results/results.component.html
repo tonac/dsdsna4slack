@@ -45,7 +45,7 @@
 
           <div class="row" style="margin:10px;">
               <div class="col-md-2" style="display: flex; align-items: center;">
-                <label style="line-height:inherit;justify-content:center" *ngIf="selectedResult.graph_type == 'mention'">Number of mentions received</label>
+                <label style="line-height:inherit;justify-content:center" *ngIf="selectedResult.graph_type == 'mention'">Number of people mentioned by</label>
                 <label style="line-height:inherit;justify-content:center"*ngIf="selectedResult.graph_type == 'subscription'">Number of people subscribed to a channel</label>
               </div>
               <div class="col-lg-1 col-xl-1"><input class="form-control" type="text" [(ngModel)]="filters.minimumInDegree" (change)="formChanged()" name="minimumInDegree" placeholder="from"/></div>
@@ -54,7 +54,7 @@
         
           <div class="row" style="margin:10px;">
               <div class="col-md-2" style="display: flex; align-items: center;">
-                <label style="line-height:inherit;justify-content:center" *ngIf="selectedResult.graph_type == 'mention'" >Number of sent mentions</label>
+                <label style="line-height:inherit;justify-content:center" *ngIf="selectedResult.graph_type == 'mention'" >Number of people mentioned</label>
                 <label style="line-height:inherit;justify-content:center" *ngIf="selectedResult.graph_type == 'subscription'">Number of subscribed channels</label>
               </div>
               <div class="col-lg-1 col-xl-1"><input class="form-control" type="text" [(ngModel)]="filters.minimumOutDegree" (change)="formChanged()" name="minimumOutDegree" placeholder="from"/></div>

@@ -16,6 +16,77 @@ export class GraphParser {
         }
     }
 
+    public prune(graph: any,
+        minimumNodeClustering: number,
+        maximumNodeClustering: number,
+        minimumInDegree: number,
+        maximumInDegree: number,
+        minimumOutDegree: number,
+        maximumOutDegree: number): any {
+            
+            let edges = graph.edges._data;
+            let nodes = graph.nodes._data;
+
+            console.log(nodes);
+
+            var newNodes = [];
+            var newEdges = [];
+
+            var nodesToAdd = {};
+            var edgesFrom = {};
+            var inDegree = {};
+            var outDegree = {};
+
+            for (let id in edges) {
+                let edge = edges[id];
+                let nodeFrom = edge.from;
+                let nodeTo = edge.to;
+
+                inDegree[nodeTo] = inDegree[nodeTo] ? inDegree[nodeTo] + 1 : 1;
+                outDegree[nodeFrom] = outDegree[nodeFrom] ? outDegree[nodeFrom] + 1 : 1;
+            }
+
+            for (let id in nodes) {
+                let node = nodes[id];
+                let nodeClustering = Number(node.title.replace('Clustering: ', ''));
+                console.log(nodeClustering);
+                if (nodeClustering) {
+                    if(nodeClustering < minimumNodeClustering || nodeClustering > maximumNodeClustering) continue;
+                }
+
+                if(inDegree[node.id]) {
+                    if(inDegree[node.id] < minimumInDegree || inDegree[node.id] > maximumInDegree) continue;
+                }
+
+                if(outDegree[node.id]) {
+                    if(outDegree[node.id] < minimumOutDegree || outDegree[node.id] > maximumOutDegree) continue;
+                }
+                nodesToAdd[node.id] = node;
+                newNodes.push(node);
+            }
+
+            for(let id in edges) {
+                let edge = edges[id];
+                let nodeFrom = edge.from;
+                let nodeTo = edge.to;
+
+                if(nodesToAdd[nodeFrom] && nodesToAdd[nodeTo]) {
+                    newEdges.push(edge);
+                }
+            }
+
+
+            console.log('new nodes');
+            console.log(newNodes);
+            console.log('new edges');
+            console.log(newEdges);
+            // create a network
+            return {
+                nodes: new DataSet(newNodes),
+                edges: new DataSet(newEdges)
+            };
+    }
+
     parseMentionBasedGraph(result: AnalysisResult): any {
         let nodes: Node = new DataSet([]);
         let edges: Edge = new DataSet([]);

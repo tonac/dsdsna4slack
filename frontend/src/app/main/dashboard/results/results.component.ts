@@ -58,7 +58,34 @@ export class ResultsComponent implements OnInit {
   }
 
   formChanged() {
-    console.log(this.filters);
+    let minimumNodeClustering: number = Number(this.filters.minimumNodeClustering) ? Number(this.filters.minimumNodeClustering) : 0.0;
+    let maximumNodeClustering: number = Number(this.filters.maximumNodeClustering) ? Number(this.filters.maximumNodeClustering) : 1.0;
+
+    let minimumInDegree: number = Number(this.filters.minimumInDegree) ? Number(this.filters.minimumInDegree) : 0.0;
+    let maximumInDegree: number = Number(this.filters.maximumInDegree) ? Number(this.filters.maximumInDegree) : Number.MAX_VALUE;
+
+    let minimumOutDegree: number = Number(this.filters.minimumOutDegree) ? Number(this.filters.minimumOutDegree) : 0;
+    let maximumOutDegree: number = Number(this.filters.maximumOutDegree) ? Number(this.filters.maximumOutDegree) : Number.MAX_VALUE;
+    
+    console.log(minimumNodeClustering + " " +
+      maximumNodeClustering + " " +
+      minimumInDegree + " " +
+      maximumInDegree + " " +
+      minimumOutDegree + " " +
+      maximumOutDegree);
+
+    let graphParser = new GraphParser();
+    var result = this.copyObject(this.selectedResult);
+    result.graph = graphParser.prune(result.graph,
+      minimumNodeClustering,
+      maximumNodeClustering,
+      minimumInDegree,
+      maximumInDegree,
+      minimumOutDegree,
+      maximumOutDegree);
+
+
+    this.displayGraph(result);
   }
 
   public getResultId(index) {
@@ -72,7 +99,11 @@ export class ResultsComponent implements OnInit {
     this.selectedResult.density = (result.density).toFixed(2);
     this.selectedResult.path_length = (result.path_length).toFixed(2);
     this.selectedResult.average_clustering = (result.average_clustering).toFixed(2);
-    
+
+    this.displayGraph(result);
+  }
+
+  displayGraph(result) {
     setTimeout(() => {
       let container = document.getElementById('my_network');
       let options = result.graph_type == 'mention' ? this.resultService.getOptionsForMentionBasedGraph() : this.resultService.getOptionsForSubscriptionBasedGraph();
@@ -82,5 +113,20 @@ export class ResultsComponent implements OnInit {
 
   public goBackToResults() {
     this.graphVisualization = false;
+    this.filters = new FilterModel()
+  }
+
+  copyObject<T> (object:T): T {
+    var objectCopy = <T>{};
+
+    for (var key in object)
+    {
+        if (object.hasOwnProperty(key))
+        {
+            objectCopy[key] = object[key];
+        }
+    }
+
+    return objectCopy;
   }
 }
