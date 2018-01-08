@@ -104,3 +104,4 @@ postgresql
 
 nginx/backend/
 nginx/frontend/
+nginx/certs/
