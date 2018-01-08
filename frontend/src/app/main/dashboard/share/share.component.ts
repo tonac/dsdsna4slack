@@ -53,11 +53,20 @@ export class ShareComponent implements OnInit {
     })
     .subscribe({
       next: requestResult => {
-        console.log(requestResult);
         if(!requestResult) {
           result.public = !result.public;
           let button = document.getElementById(id + '-share-button');
-          button.innerText = result.public ? 'Stop sharing' : 'Share'
+          let link = <HTMLLinkElement>document.getElementById(id + '-share-link');
+
+          if(result.public) {
+            button.innerText = 'Stop sharing';
+            link.style.display = 'block';
+            link.href = window.location.href.substring(0, -1) + 'results/' + id;
+          link.textContent = "link to results"
+          } else {
+            button.innerText = 'Share';
+            link.style.display = 'none';
+          }
         }
       }
     })

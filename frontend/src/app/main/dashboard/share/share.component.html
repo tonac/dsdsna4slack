@@ -24,11 +24,7 @@
       <button id="{{result.id}}-share-button" class="btn btn-default btn-primary" style="width:100%" (click)='toogleShare(result, result.id)'>
          {{result.public ? 'Stop sharing' : 'Share'}}
         </button>
-        <div>
-          <span>
-            link
-          </span>
-        </div>
+        <a id="{{result.id}}-share-link" style="display:none; width:100%; text-align:center;"></a>
     </div>
     <app-network-vis [network]="result" [networkIndex]="i"></app-network-vis>
   </div>

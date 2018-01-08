@@ -16,7 +16,6 @@ export class ShareService {
             [resultID, shouldShare],
             this.userService.jwt()
         ).map((response: Response) => {
-            console.log(response.status);
             return response.status == 200;
         })
     }
