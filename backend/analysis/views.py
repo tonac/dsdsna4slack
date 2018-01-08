@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status, response
+from rest_framework import viewsets, permissions, status, response, generics
 
 from analysis.models import OverallMetrics
 from analysis.permissions import HasMetricsPermission
@@ -8,7 +8,7 @@ from archive.models import Archive
 
 class OverallMetricsViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, HasMetricsPermission)
-    http_method_names = ['get', 'head', 'delete', 'post']
+    http_method_names = ['get', 'head', 'delete', 'post', 'put']
 
     def get_queryset(self):
         if self.action in ['list', 'retrieve']:
@@ -30,3 +30,19 @@ class OverallMetricsViewSet(viewsets.ModelViewSet):
         graph_type = serializer.validated_data['graph_type']
         analysis_result = serializer.save(archive, channels, graph_type)
         return response.Response(analysis_result, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        metrics = OverallMetrics.objects.filter(pk=kwargs.get('pk'), archive__user=request.user).first()
+        if metrics:
+            metrics.public = not metrics.public
+            metrics.save()
+            return response.Response({'link': metrics.public_key.hex, 'public': metrics.public},
+                                     status=status.HTTP_200_OK)
+        else:
+            return response.Response('Metric not found', status=status.HTTP_403_FORBIDDEN)
+
+
+class GetPublicAnalysis(generics.RetrieveAPIView):
+    serializer_class = OverallMetricsSerializer
+    queryset = OverallMetrics.objects.filter(public=True)
+    lookup_field = 'public_key'
