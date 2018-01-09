@@ -19,8 +19,7 @@ class ArchiveTests(APITestCase):
 
     def setUp(self):
         self.tearDown()
-        self.user = User.objects.create_user('test', password='test',
-                                             email='test@test.test')
+        self.user = User.objects.create_user('test', password='test', email='test@test.test')
         self.user.save()
         self.authenticate()
         Archive.objects.create(name='test_archive1', user=self.user)
@@ -41,37 +40,32 @@ class ArchiveTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     def _create_test_file_not_zip(self, name):
-        f = open('\\Temp\\' + name, 'w')
-        f.write('test file not zip\n')
-        f.close()
-        f = open('\\Temp\\' + name, 'rb')
-        return {'datafile': f}
+        with open('./tmp/' + name, 'w') as f
+            f.write('test file not zip\n')
+        with open('./tmp/' + name, 'rb') as f
+            return {'datafile': f}
 
     def _create_test_file_empty_zip(self, name):
-        f = zipfile.ZipFile('\\Temp\\' + name, 'w')
-        f.close()
-        f = open('\\Temp\\' + name, 'rb')
-        return {'datafile': f}
+        with zipfile.ZipFile('./tmp/' + name, 'w') f
+        with open('./tmp/' + name, 'rb') as f
+            return {'datafile': f}
 
     def _create_test_file_zip_users_and_channels(self, name):
         # writing into users.json file
         user1 = {'id': 'O3FCKBNMN', 'team_id': 'T7FCGNJ5N', 'name': 'test.user123', 'is_bot': False}
         user2 = {'id': 'U7FDLMP6U', 'team_id': 'T7FCGNJ5N', 'name': 'test.exporter', 'is_bot': False}
         users = [user1, user2]
-        user_file = open('\\Temp\\users.json', 'w')
+        with open('./tmp/users.json', 'w') as user_file
         user_file.write(json.dumps(users))
-        user_file.close()
         # writing into channels.json file
         channel1 = {'id': 'C7GU87QEA', 'name': 'test_general', 'members': ['O3FCKBNMN']}
-        channel_file = open('\\Temp\\channels.json', 'w')
+        with open('./tmp/channels.json', 'w') as channel_file
         channel_file.write(json.dumps([channel1]))
-        channel_file.close()
         # creating zip file
-        f = zipfile.ZipFile('\\Temp\\' + name, 'w')
+        with zipfile.ZipFile('./tmp/' + name, 'w') as f
         f.write(user_file.name, arcname='users.json')
         f.write(channel_file.name, arcname='channels.json')
-        f.close()
-        f = open('\\Temp\\' + name, 'rb')
+        with open('./tmp/' + name, 'rb') as f
         return {'datafile': f}
 
     def test_authenticated_user_get_archives(self):
