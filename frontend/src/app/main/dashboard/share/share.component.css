@@ -1,0 +1,14 @@
+#my_network {
+    width: 90%;
+    height: 600px;
+    border: 1px solid lightgray;
+  }
+  
+  .vertical-align {
+    display: flex;
+    align-items: center;
+    height: 10%;
+    padding-bottom: 2.5%;
+    padding-top: 2.5%;
+    border-bottom: 1px dotted rgb(77, 57, 75);
+  }

@@ -18,6 +18,7 @@ import {ShareComponent} from './main/dashboard/share/share.component';
 
 import {routing} from "./app.routing";
 import {AuthGuard} from "./guards/auth.guard";
+import { ShareService } from "./services/share.service";
 
 export class TestConfig {
   static testModule = {
@@ -42,6 +43,7 @@ export class TestConfig {
       AuthGuard,
       AuthenticationService,
       UserService,
+      ShareService,
       {provide: APP_BASE_HREF, useValue: '/'}
     ]
   }

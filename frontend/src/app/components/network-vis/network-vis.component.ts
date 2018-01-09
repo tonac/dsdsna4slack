@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Network} from 'vis';
-import {ResultService} from '../../../../services/result.service';
+import {ResultService} from '../../services/result.service';
 
 
 @Component({

@@ -12,4 +12,5 @@ export class AnalysisResult {
     graph: any;
     archive_name: string;
     analysed_channels_names: Array<any>;
+    public_key: string;
 }

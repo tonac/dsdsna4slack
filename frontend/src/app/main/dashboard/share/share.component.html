@@ -1,3 +1,31 @@
-<p>
-  share works!
-</p>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-10" style="display: flex; align-items: center;">
+      <h1 style="line-height:inherit;justify-content:center">
+        Share
+      </h1>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="row vertical-align" *ngFor="let result of resultsArray; let i = index">
+    <div class="col-md-5">
+      <h3>{{result.archive_name}}</h3>
+      Graph is {{result.graph_type}} based from these channels:
+      <span *ngFor="let channel of result.analysed_channels_names; let i = index">
+        {{channel.name + (result.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+      </span>
+    </div>
+    <div class="col-md-4">
+      <div [id]="getResultId(i)"></div>
+    </div>
+    <div class="col-md-3">
+      <button id="{{result.id}}-share-button" class="btn btn-default btn-primary" style="width:100%" (click)='toogleShare(result, result.id)'>
+         {{result.public ? 'Stop sharing' : 'Share'}}
+        </button>
+        <a *ngIf="result.public" id="{{result.public_key}}-share-link" [href]="shareLinkFor(result.public_key)" style="width:inherit; text-align:center;"> link to the graph</a>
+    </div>
+    <app-network-vis [network]="result" [networkIndex]="i"></app-network-vis>
+  </div>
+</div>

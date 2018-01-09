@@ -1,0 +1,103 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-10" style="display: flex; align-items: center;">
+      <h1 style="line-height:inherit;justify-content:center">
+        Results
+      </h1>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="hasResults">
+    <div style="width:100%; text-align:center;">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-10" style="display: flex; align-items: center;">
+              <h1 style="line-height:inherit;justify-content:center">
+                {{selectedResult.archive_name}}
+              </h1>
+            </div>
+          </div>
+          <p style="text-align:left">
+            Graph is {{selectedResult.graph_type}} based from these channels:
+            <span *ngFor="let channel of selectedResult.analysed_channels_names; let i = index">
+              {{channel.name + (selectedResult.analysed_channels_names.length == i + 1 ? '.' : ', ')}}
+            </span>
+          </p>
+        </div>
+      
+      
+        <div id="my_network" class="row" style="display:inline-block;"></div>
+      </div>
+      <br>
+      
+      <div class="container">
+        <div id="metrics-div" class="row my-row">
+          <div class="container">
+            <div id="metrics-div" class="row my-row">
+      
+              <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+                <span class="metric-span">
+                  <div>
+                    <img class="metric-image" src="/assets/img/density_icon.png">
+                  </div>
+                  <h4>Density</h4>
+                  <h1>{{selectedResult.density}}</h1>
+                  <p>{{selectedResult.graph_type == 'mention' ? UIConstants.densityExplanationForMentionBased : UIConstants.densityExplanationForSubscriptionBased}}</p>
+                </span>
+              </div>
+      
+              <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+                <span class="metric-span">
+                  <div>
+                    <img class="metric-image" src="/assets/img/path_length_icon.png">
+                  </div>
+                  <h4>Path length</h4>
+                  <h1>{{selectedResult.path_length}}</h1>
+                  <p>{{UIConstants.pathLengthExplanation}}</p>
+                </span>
+              </div>
+      
+              <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+                <span class="metric-span">
+                  <div>
+                    <img class="metric-image" src="/assets/img/edge_connectivity_icon.png">
+                  </div>
+                  <h4>Edge connectivity</h4>
+                  <h1>{{selectedResult.edge_connectivity}}</h1>
+                  <p>{{UIConstants.edgeConnectivityExplanation}}</p>
+                </span>
+              </div>
+      
+              <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+                <span class="metric-span">
+                  <div class>
+                    <img class="metric-image" src="/assets/img/node_connectivity_icon.png">
+                  </div>
+                  <h4>Node connectivity</h4>
+                  <h1>{{selectedResult.node_connectivity}}</h1>
+                  <p>{{UIConstants.nodeConnectivityExplanation}}</p>
+                </span>
+              </div>
+      
+              <div class="col-xs-6 col-md-5 col-lg-3 col-xl-3 metric-element" style="display: flex; align-items: center;">
+                <span class="metric-span">
+                  <div class>
+                    <img class="metric-image" src="/assets/img/clustering_icon.png">
+                  </div>
+                  <h4>Average clustering</h4>
+                  <h1>{{selectedResult.average_clustering}}</h1>
+                  <p>{{selectedResult.graph_type == 'mention' ? UIConstants.averageClusteringExplanationForMentionBased : UIConstants.averageClusteringExplanationForSubscriptionBased}}</p>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+<div *ngIf="!hasResults">
+  <h4>
+    Sorry, you don't have permission to view this page.
+  </h4>
+</div>

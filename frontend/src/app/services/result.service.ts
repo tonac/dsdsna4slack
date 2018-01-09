@@ -22,10 +22,18 @@ export class ResultService {
     });
   }
 
-  getResultsForId(id: number): Observable<any> {
+  getResultsForId(id: number): Observable<AnalysisResult> {
     return this.http.get(
       '/api/analysis/v1/overall-metrics/' + id,
       this.userService.jwt()
+    ).map((response: Response) => {
+      return response.json() as AnalysisResult;
+    });
+  }
+
+  getPublicResultForKey(key: string) : Observable<AnalysisResult> {
+    return this.http.get(
+      '/api/analysis/v1/share/' + key
     ).map((response: Response) => {
       return response.json() as AnalysisResult;
     });

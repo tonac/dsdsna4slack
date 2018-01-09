@@ -19,9 +19,11 @@ import {ResultsComponent} from './main/dashboard/results/results.component';
 import {ShareComponent} from './main/dashboard/share/share.component';
 import {ArchiveService} from './services/archive.service';
 import {ResultService} from './services/result.service';
-import { NetworkVisComponent } from './main/dashboard/results/network-vis/network-vis.component';
+import { NetworkVisComponent } from './components/network-vis/network-vis.component';
 import { SpinnerModule } from '@chevtek/angular-spinners';
 import { Data } from './model/data';
+import { ShareService } from './services/share.service';
+import { PublicShareComponent } from './main/publicShare/publicShare.component';
 
 
 let homeState = {name: 'home', url: '/', component: HomeComponent};
@@ -46,7 +48,8 @@ let registerState = {name: 'register', url: '/register', component: RegisterComp
     AnalyseComponent,
     ResultsComponent,
     ShareComponent,
-    NetworkVisComponent
+    NetworkVisComponent,
+    PublicShareComponent
   ],
   providers: [
     AuthGuard,
@@ -55,6 +58,7 @@ let registerState = {name: 'register', url: '/register', component: RegisterComp
     UserService,
     ArchiveService,
     ResultService,
+    ShareService,
     Data,
     BaseRequestOptions
   ],
