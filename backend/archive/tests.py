@@ -10,10 +10,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 from urllib.parse import urlparse
 
+from .models import Archive 
 
-
-from .models import Archive
-
+TEMP_DIR = '/tmp'
 
 class ArchiveTests(APITestCase):
 
@@ -40,33 +39,37 @@ class ArchiveTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     def _create_test_file_not_zip(self, name):
-        with open('./tmp/' + name, 'w') as f:
-            f.write('test file not zip\n')
-        with open('./tmp/' + name, 'rb') as f:
-            return {'datafile': f}
+        f = open(TEMP_DIR + '/' + name, 'w') 
+        f.write('test file not zip\n')
+        f.close()
+        f = open(TEMP_DIR + '/' + name, 'rb')
+        return {'datafile': f}
 
     def _create_test_file_empty_zip(self, name):
-        with zipfile.ZipFile('./tmp/' + name, 'w') as f:
-        #with open('./tmp/' + name, 'rb') as f:
-            return {'datafile': f}
+        f = zipfile.ZipFile(TEMP_DIR + '/' + name, 'w')
+        f.write('')
+        f.close()
+        f = open(TEMP_DIR + '/' + name, 'rb')
+        return {'datafile': f}
 
     def _create_test_file_zip_users_and_channels(self, name):
         # writing into users.json file
         user1 = {'id': 'O3FCKBNMN', 'team_id': 'T7FCGNJ5N', 'name': 'test.user123', 'is_bot': False}
         user2 = {'id': 'U7FDLMP6U', 'team_id': 'T7FCGNJ5N', 'name': 'test.exporter', 'is_bot': False}
+        channel1 = {'id': 'C7GU87QEA', 'name': 'test_general', 'members': ['O3FCKBNMN']}
         users = [user1, user2]
-        with open('./tmp/users.json', 'w') as user_file:
-            user_file.write(json.dumps(users))
-            # writing into channels.json file
-            channel1 = {'id': 'C7GU87QEA', 'name': 'test_general', 'members': ['O3FCKBNMN']}
-        with open('./tmp/channels.json', 'w') as channel_file:
-            channel_file.write(json.dumps([channel1]))
+        f = zipfile.ZipFile(TEMP_DIR + '/' + name, 'w')
+        user_file = open(TEMP_DIR + '/users.json', 'w')
+        user_file.write(json.dumps(users))
+        # writing into channels.json file
+        channel_file = open(TEMP_DIR + '/channels.json', 'w')
+        channel_file.write(json.dumps([channel1]))
         # creating zip file
-        with zipfile.ZipFile('./tmp/' + name, 'w') as f:
-            f.write(user_file.name, arcname='users.json')
-            f.write(channel_file.name, arcname='channels.json')
-        with open('./tmp/' + name, 'rb') as f:
-            return {'datafile': f}
+        f.write(user_file.name, arcname='users.json')
+        f.write(channel_file.name, arcname='channels.json')
+        f.close()
+        f = open(TEMP_DIR + '/' + name, 'rb')
+        return {'datafile': f}
 
     def test_authenticated_user_get_archives(self):
         # assert authenticated user can get archives
@@ -97,7 +100,7 @@ class ArchiveTests(APITestCase):
         self.assertContains(response, "Archive is not a zip file", status_code=400)
         data1.get('datafile').close()
 
-    def test_upload_not__valid_zip_file(self):
+    def test_upload_non_valid_zip_file(self):
         # assert authenticated user cannot upload zip file without users.json and channels.json files 
         url = reverse('archive-list')
         data2 = self._create_test_file_empty_zip('test2.zip')
