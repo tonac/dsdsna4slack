@@ -13,6 +13,7 @@ export class ShareService {
     setShare(resultID: string): Observable<boolean> {
         return this.http.put(
             '/api/analysis/v1/overall-metrics/' + resultID + '/',
+            'esi mi dobar?',
             this.userService.jwt()
         ).map((response: Response) => {
             console.log(response);

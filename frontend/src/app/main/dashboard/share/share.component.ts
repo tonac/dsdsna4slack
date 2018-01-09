@@ -57,22 +57,7 @@ export class ShareComponent implements OnInit {
     })
   }
 
-  // updateUI(isPublic: boolean, id: string) {
-  //   let button = document.getElementById(id + '-share-button');
-  //   let link = <HTMLLinkElement>document.getElementById(id + '-share-link');
-
-  //   if(isPublic) {
-  //     button.innerText = 'Stop sharing';
-  //     link.style.display = 'block';
-  //     link.href = window.location.href.substring(0, -1) + 'shared/' + id;
-  //     link.textContent = "link to results"
-  //   } else {
-  //     button.innerText = 'Share';
-  //     link.style.display = 'none';
-  //   }
-  // }
-
   shareLinkFor(id: string) {
-    return window.location.href.substring(0, -1) + 'shared/' + id.replace;
+    return window.location.href.substring(0, -1) + 'shared/' + id.replace(/-/gi, '');
   }
 }

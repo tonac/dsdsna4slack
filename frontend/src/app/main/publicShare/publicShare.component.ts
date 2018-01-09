@@ -29,9 +29,11 @@ export class PublicShareComponent implements OnInit {
       })
       .subscribe({
         next: result => {
+          console.log(result);
           this.selectedResult = result;
-          let graph = graphParser.parse(result);
+          result.graph = graphParser.parse(result);
           this.hasResults = true;
+          console.log(result);
           this.displayGraph(result);
         }, 
         error: err => {
